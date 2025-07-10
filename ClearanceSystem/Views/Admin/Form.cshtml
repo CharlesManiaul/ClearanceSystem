@@ -1,0 +1,277 @@
+﻿@{
+    ViewData["Title"] = "Registration Form";
+}
+
+@model Registration
+
+<div class="page-header d-print-none">
+    <div class="container-xxl">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">
+
+                    <h2 class="page-title">
+                        Registration Form
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-auto ms-auto d-print-none">
+                @*
+                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalGroup">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-bubble-text"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10h10" /><path d="M9 14h5" /><path d="M12.4 3a5.34 5.34 0 0 1 4.906 3.239a5.333 5.333 0 0 1 -1.195 10.6a4.26 4.26 0 0 1 -5.28 1.863l-3.831 2.298v-3.134a2.668 2.668 0 0 1 -1.795 -3.773a4.8 4.8 0 0 1 2.908 -8.933a5.33 5.33 0 0 1 4.287 -2.16" /></svg>
+                Register Clearance
+                </a> *@
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+<div class="page-body">
+    <div class="container-xxl ">
+        <div class="card shadow-sm rounded-lg border-0">
+
+           
+
+
+            @using (Html.BeginForm("SaveForm", "Admin", FormMethod.Post, new { id = "form-registration", enctype = "multipart/form-data" }))
+            {  
+                <div class="card-header bg-primary text-white">
+                <h5 class="card-title">Register Clearance</h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8 row">
+                            <!-- Employee ID (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="Id">Employee ID</label>
+                                <select id="Id" class="form-select tom-select-subtitle" asp-for="EmpId" required>
+                                    <option value="" disabled selected>Select Employee ID</option>
+                                    @foreach (var item in Model.Register)
+                                    {
+                                        <option value="@item.EmpId" data-subtitle="@item.EmployeeName" data-company="@item.Company" data-position="@item.position" data-datehired="@item.DateHired" data-department="@item.Department" data-departmentid="@item.DepartmentId">@item.EmpId</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <!-- Employee Name (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="EmpName">Employee Name</label>
+                                @Html.TextBoxFor(m => m.Name, new { @class = "form-control", @placeholder = "Enter Employee Name", @id = "EmpName", @readonly = "readonly", @required = "required" })
+                            </div>
+                            @Html.HiddenFor(m => m.Company, new{ @id = "Company" })
+                            <!-- Position (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="position">Position</label>
+                                @Html.TextBoxFor(m => m.position, new { @class = "form-control", @placeholder = "Enter Position", @id = "position", @readonly = "readonly", @required = "required" })
+
+                            </div>
+
+                            <!-- Department (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="departmentId">Department</label>
+                                @Html.TextBoxFor(m => m.Department, new { @class = "form-control", @placeholder = "Enter Department", @readonly = "readonly", @required = "required" })
+                                @Html.HiddenFor(m => m.DepartmentId, new { @class = "form-control", @placeholder = "Enter DEPARTMENT ID", @readonly = "readonly", @required = "required" })
+                            </div>
+
+                            <!-- Date Hired (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="DateHired">Date Hired</label>
+                                @Html.TextBoxFor(m => m.DateHired, new { @class = "form-control date-input", @placeholder = "Select Date", @disabled = "true", @required = "required" })
+                            </div>
+
+                            <!-- Last Day of Employment (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="LastDay">Last Day of Employment</label>
+                                @Html.TextBoxFor(m => m.LastDay, new { @class = "form-control date-input", @placeholder = "Select Date", @required = "required" })
+                            </div>
+
+                         
+
+                            <!-- Description (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="Description">Reason</label>
+                                <select class="form-select tom-select-new-add" asp-for="Description">
+                                    <optgroup label="Voluntary">
+                                       
+                                    </optgroup>
+                                    <optgroup label="Involuntary">
+                                       
+
+                                    </optgroup>
+                                    <optgroup label="Others">
+
+                                    </optgroup>
+                                </select>
+                            </div>
+
+
+                            <!-- Remarks (Mobile and Desktop) -->
+                            <div class="col-md-6 col-12 p-2">
+                                <label class="form-label" for="Remarks">Remarks</label>
+                                @Html.TextAreaFor(m => m.Remarks, new { @class = "form-control", @placeholder = "Enter Remarks", @required = "required", @data_bs_toggle = "autosize" })
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-4">
+
+                            <!-- Right Column: File Upload -->
+                            <div class="col-12">
+                                <h3 class="card-title text-center">File Upload</h3>
+                                <div class="mb-3">
+                                    <div id="multiple" class="dropzone border p-3 rounded shadow-sm">
+                                        <div class="dz-message" data-dz-message><span>Drag & Drop files here or click to upload</span></div>
+                                    </div>
+
+                                    <!-- Hidden input for Dropzone files -->
+                                    <input type="file" name="Files" id="Files" hidden multiple accept=".pdf, .jpg, .jpeg, .png" />
+                                </div>
+                            </div>
+
+                         
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="d-flex justify-content-end gap-3 col-auto ms-auto d-print-none">
+
+                        <a class="btn btn-ghost-secondary">
+                            Cancel
+                        </a>
+
+                        <button class="btn btn-primary btnNext" id="submitFormBtn">
+                            <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M14 4l0 4l-6 0l0 -4" /></svg>
+                            Save
+                        </button>
+
+                    </div>
+                </div>
+                @* @Html.HiddenFor(m => m.Company, new { @class = "form-control", @required = "required" }) *@
+                
+            }
+           
+
+        </div>
+    </div>
+</div>
+
+@*Scripts*@
+
+<!-- Dropzone CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css" rel="stylesheet">
+
+<!-- Dropzone JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+
+@section Scripts
+{
+    <script>
+        // Initialize Dropzone for file upload
+        Dropzone.autoDiscover = false;
+
+        const myDropzone = new Dropzone("#multiple", {
+            url: "#", // Placeholder URL, the form handles submission
+            paramName: "Files",
+            maxFilesize: 5, // Max file size in MB
+            acceptedFiles: ".jpg,.jpeg,.png,.pdf,.docx",
+            dictDefaultMessage: "Drag & Drop files here or click to upload",
+            addRemoveLinks: true,
+            autoProcessQueue: false,
+            init: function () {
+                this.on("addedfile", function () {
+                    $('#dropzone-feedback').remove(); // Remove feedback on adding files
+                });
+                this.on("removedfile", function () {
+                    if (this.files.length === 0) {
+                        $("#multiple").after('<div id="dropzone-feedback" class="text-danger">Please upload at least one file.</div>');
+                    }
+                });
+            },
+        });
+
+        // Form validation function
+        function validateForm() {
+            let isValid = true;
+
+            // Validate required fields
+            $('input[required], select[required]').each(function () {
+                const field = $(this);
+                if (field.val().trim() === "") {
+                    isValid = false;
+                    field.addClass("is-invalid");
+                    field.siblings(".invalid-feedback").remove(); // Clear existing feedback
+                    field.after('<div class="invalid-feedback">This field is required.</div>');
+                } else {
+                    field.removeClass("is-invalid");
+                    field.siblings(".invalid-feedback").remove();
+                }
+            });
+
+            // // Ensure at least one file in Dropzone
+            // if (myDropzone.files.length === 0) {
+            //     isValid = false;
+            //     if (!$('#dropzone-feedback').length) {
+            //         $("#multiple").after('<div id="dropzone-feedback" class="text-danger">Please upload at least one file.</div>');
+            //     }
+            // } else {
+            //     $('#dropzone-feedback').remove();
+            // }
+
+            return isValid;
+        }
+
+        // Handle form submission
+        $('#submitFormBtn').on('click', function (e) {
+            e.preventDefault();
+
+            if (validateForm()) {
+                // Add Dropzone files to hidden input for form submission
+                const hiddenInput = document.getElementById("Files");
+                const dataTransfer = new DataTransfer();
+
+                myDropzone.files.forEach((file) => {
+                    dataTransfer.items.add(file);
+                });
+
+                hiddenInput.files = dataTransfer.files;
+
+                // Submit the form
+                $('#form-registration').submit();
+            } else {
+                alert("Please fix the errors in the form before submitting.");
+            }
+        });
+
+        // Reset error states on input change
+        $('input, select').on('input change', function () {
+            $(this).removeClass("is-invalid");
+            $(this).siblings(".invalid-feedback").remove();
+        });
+
+
+        // Populate fields based on the selected Employee ID
+        $(function () {
+            $('#Id').change(function () {
+                const selectedOption = $(this).find(':selected');
+
+                $('#EmpName').val(selectedOption.data('subtitle'));
+                $('#position').val(selectedOption.data('position'));
+                $('#DateHired').val(selectedOption.data('datehired'));
+                $('#Department').val(selectedOption.data('department'));
+                $('#DepartmentId').val(selectedOption.data('departmentid'));
+                $('#Company').val(selectedOption.data('company'));
+            });
+        });
+    </script>
+
+}

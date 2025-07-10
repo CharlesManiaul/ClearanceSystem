@@ -1,0 +1,67 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@ViewData["Title"] - LOGIN</title>
+    <link rel="stylesheet" href="~/css/tabler.css" />
+    <link rel="stylesheet" href="~/css/tabler-vendors.css" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <style>
+
+        :root {
+            --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+        }
+
+        body {
+            font-feature-settings: "cv03", "cv04", "cv11";
+        }
+    </style>
+
+</head>
+<body>
+    <div class="page page-center">
+        <div class="container container-normal py-4">
+            <div class="row align-items-center g-4">
+                <div class="col-lg">
+                    <div class="container-tight">
+                        <div class="text-center mb-4">
+                            <img src="/static/Clearance.svg" height="100" alt=""></a>
+                        </div>
+                        <div class="card card-md">
+                            <div class="card-body">
+                                <h2 class="h2 text-center mb-4">Login to your account</h2>
+                                <form action="/Account/Login" method="post" autocomplete="off">
+                                    <div class="mb-3">
+                                        <label class="form-label">Employee Id</label>
+                                        <input type="text" class="form-control @TempData["invalid"]" placeholder="00000" autocomplete="off" name="username" required>
+                                        
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">
+                                            Password
+                                        </label>
+                                        <div class="input-group input-group-flat">
+                                            <input type="password" class="form-control @TempData["invalid"]" placeholder="password" name="password" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-footer">
+                                        <button type="submit" class="btn btn-teal w-100">Sign in</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg d-none d-lg-block">
+                    <img src="/static/login2.svg" height="300" class="d-block mx-auto" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

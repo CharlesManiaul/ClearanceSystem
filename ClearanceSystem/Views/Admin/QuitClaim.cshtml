@@ -1,0 +1,322 @@
+﻿@{
+    ViewData["Title"] = "Quit Claim and Release Page";
+}
+
+@model Registration
+
+<div class="page-header d-print-none">
+    <div class="container-xxl">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">
+                    Index - Quit Claim
+                    <h2 class="page-title">
+                        Quit Claim and Release
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-auto ms-auto d-print-none">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xxl ">
+        <div class="card">
+            <div id="table-default">
+                <div class="col- d-lg-flex px-3 pt-3">
+
+                    <div class="d-flex text-center text-lg-start mb-3">
+                        <div class="text-muted">
+                            Show
+                            <div class="mx-2 d-inline-block w-25">
+                                <input id="entries" type="number" class="form-control" value="10" autocomplete="off">
+                            </div>
+                            entries
+                        </div>
+
+                    </div>
+
+                    <div class="input-icon mb-3 ms-auto">
+                        <input type="search" class="search form-control" placeholder="Search">
+                        <span class="input-icon-addon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+                        </span>
+
+                    </div>
+                </div>
+
+
+                <hr class="m-0">
+
+                <div class="table-responsive">
+                    <table class="table text-muted table-mobile-sm" id="datatable" data-filename="Registration">
+                        <thead class="table-thead">
+                            <tr>
+                                <th>Status</th>
+                                <th><button class="table-sort" data-sort="sort-ID">Registration ID</button></th>
+                                <th><button class="table-sort" data-sort="sort-EmpId">Employee ID</button></th>
+                                <th><button class="table-sort" data-sort="sort-EmpName">Employee Name</button></th>
+                                <th><button class="table-sort" data-sort="sort-Department">Department</button></th>
+                                <th><button class="table-sort" data-sort="sort-Remarks">Remarks</button></th>
+                                <th><button class="table-sort" data-sort="sort-LDay">Last Day</button></th>
+
+                                @if (Model.Register.Any(m => m.Status != "Claimed"))
+                                {
+                                    <th>Action</th>
+                                }
+                                @if (Model.QCAttachments != null && Model.QCAttachments.Any())
+                                {
+                                    <th>Download</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody class="table-tbody">
+                            @if (Model.Register == null || !Model.Register.Any())
+                            {
+                                <tr>
+                                    <td colspan="9" class="text-center">NO DATA AVAILABLE</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.Register)
+                                {
+                                    <tr>
+                                        @{
+                                            string badgeClass = "bg-secondary-lt";
+                                            string badgeText = "Inactive";
+                                            switch (row.Status)
+                                            {
+
+                                                case "Claimed":
+                                                    badgeClass = "bg-success-lt";
+                                                    badgeText = "Claimed";
+                                                    break;
+
+
+                                                case "Pending":
+                                                    badgeClass = "bg-danger-lt";
+                                                    badgeText = "Pending";
+                                                    break;
+
+                                            }
+
+                                        }
+
+                                        <td data-label="Status">
+                                            <span class="badge @badgeClass">@row.Status</span>
+                                        </td>
+
+                                        <td data-label="Registration ID" class="text-nowrap sort-ID">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.RId</a>
+                                        </td>
+                                        <td data-label="Employee ID" class="text-nowrap sort-EmpId">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.EmpId</a>
+                                        </td>
+                                        <td data-label="Employee Name" class="text-nowrap sort-EmpName">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Name</a>
+
+                                        </td>
+                                        <td data-label="Department" class="text-nowrap sort-Department">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.DepartmentName</a>
+                                        </td>
+                                        <td data-label="Remarks" class="text-nowrap sort-Remarks">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Remarks</a>
+                                        </td>
+                                        <td data-label="Last Day" class="text-nowrap sort-LDay">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.LastDay</a>
+                                        </td>
+
+
+
+                                        @if (Model.Register.Any(m => m.Status != "Claimed"))
+                                        { 
+                                        <td data-label="Action">
+                                           
+                                            <a type="button" class="btn btn-outline-danger btnUpload" data-qcid="@row.QCId" data-rid="@row.RId" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                                                Upload
+                                            </a>
+
+
+                                            <a type="button" class="btn btn-outline-warning btnPrint" data-rid="@row.RId" data-company="@row.Company" data-bs-toggle="modal" data-bs-target="#printModal">
+                                                Print
+                                            </a>
+
+
+                                                <a type="button" class="btn btn-outline-success btnClaim" data-qcid="@row.QCId" data-rid="@row.RId" data-company="@row.Company" data-bs-toggle="modal" data-bs-target="#ClaimModal">
+                                                Claim
+                                            </a>
+                                        </td> 
+
+
+                                        }
+                                       
+
+                                        @if (Model.QCAttachments != null && Model.QCAttachments.Any())
+                                        {
+                                            <td data-label="Download">
+                                                <a type="button" class="btn btn-outline-warning btnDL" data-rid="@row.RId">
+                                                    Download
+                                                </a>
+                                            </td>
+                                        }
+                                        
+
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (TempData["NoFileMessage"] != null)
+                {
+                    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3">
+                        <div id="toastMessage" class="toast show align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <strong>⚠️ Warning:</strong> @TempData["NoFileMessage"]
+                                </div>
+                                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="card-footer d-flex align-items-center">
+                    <ul class="pagination m-0 ms-auto"></ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("UploadClaim", "Admin", FormMethod.Post, new { id = "form-upload-claim", enctype = "multipart/form-data" }))
+{
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    @Html.HiddenFor(m => m.RId, new { @id = "QRId" })
+                    @Html.HiddenFor(m => m.QCId, new { @id = "QCId" })
+                    <div class="mb-3">
+                        <label class="form-label">Choose File</label>
+                        <input type="file" asp-for="Files" class="form-control" multiple accept=".pdf" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Upload</button>
+             
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("PrintClaim", "Admin", FormMethod.Post, new { id = "form-print-claim" }))
+{
+    <!-- Print Modal -->
+    <div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="printModalLabel">Print Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to print this report?</p>
+                    @Html.HiddenFor(m => m.Company, new { @id = "comp" })
+                    <button type="submit" class="btn btn-success" id="confirmPrint">Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@using (Html.BeginForm("EditClaim", "Admin", FormMethod.Post, new { id = "form-edit-claim" }))
+{
+
+
+
+    <!-- Print Modal -->
+    <div class="modal fade" id="ClaimModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="printModalLabel">Claim this transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to claim this Quit and Claim?</p>
+                    @Html.HiddenFor(m => m.Company, new { @id = "comp" })
+
+                    @Html.HiddenFor(m => m.QCId, new { @id = "qcid" })
+                    <button type="submit" class="btn btn-success" id="confirmClaim">Claim</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+
+@section Scripts 
+{
+    <script>
+          $(".btnUpload").click(function () {
+            let rid = $(this).data("rid");
+            let qcid = $(this).data("qcid");
+            $("#QRId").val(rid);
+            $("#QCId").val(qcid);
+        });
+
+
+        $(".btnPrint").click(function () {
+            let comp = $(this).data("company");
+            $("#comp").val(comp);
+        });
+
+
+          $(".btnClaim").click(function () {
+            let qcid = $(this).data("qcid");
+            $("#qcid").val(qcid);
+        });
+
+         $(".btnDL").click(function () {
+            var rid = $(this).data("rid");
+             $("#RId").val(rid);
+
+            window.location.href = "/Admin/DownloadClaim/" + rid;
+        });
+
+        $(document).ready(function () {
+            let toastEl = $("#toastMessage");
+            if (toastEl.length) {
+                let toast = new bootstrap.Toast(toastEl[0], { delay: 3000 });
+                toast.show();
+            }
+        });
+
+    </script>
+
+
+
+
+}

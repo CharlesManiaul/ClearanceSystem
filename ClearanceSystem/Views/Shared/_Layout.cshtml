@@ -1,0 +1,621 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Clearance System</title>
+    <link rel="stylesheet" href="~/css/tabler-custom.css" />
+    <link rel="stylesheet" href="~/css/tabler-vendors.min.css" />
+    <link rel="stylesheet" href="~/lib/dropzone/dist/dropzone.css?1684106062" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="icon" href="Images/favicon.jpg" />
+    <style>
+
+
+        .ts-dropdown {
+        z-index: 10001;
+        }
+
+        [data-bs-theme="light"] .theme-text {
+        color: var(--text-light);
+        }
+
+        [data-bs-theme="dark"] .theme-text {
+        color: var(--text-dark);
+        }
+
+    </style>
+
+</head>
+<body class="" data-bs-theme="dark">
+    <div class="page">
+        <header class="navbar navbar-expand-md d-print-none">
+            <div class="container-xxl">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                    <a href="/Home/Index">
+                        <img src="/static/Clearance.svg" width="500" height="32" alt="Clearance" class="navbar-brand-image">
+                    </a>
+                </h1>
+                <div class="navbar-nav flex-row order-md-last">
+
+                    <div class="d-none d-md-flex">
+                        <a href="?theme=dark" id="dark-mode" class="nav-link px-0 hide-theme-dark" title="Enable dark mode" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom">
+                            <!-- SVG icon for moon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg>
+                        </a>
+                        <a href="?theme=light" id="light-mode" class="nav-link px-0 hide-theme-light" title="Enable light mode" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom">
+                            <!-- SVG icon for sun -->
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" /></svg>
+                        </a>
+                    </div>
+
+
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
+                            <span class="avatar avatar-sm" aria-label="User Profile">
+                                <img src="/static/profile.png">
+                            </span>
+                            <div class="d-none d-xl-block ps-2">
+                                <div>@User.Identity.Name</div>
+                                <div class="mt-1 small text-secondary">@User.FindFirst("position")?.Value</div>
+                            </div>
+                        </a>
+
+
+
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            @* <a href="#" class="dropdown-item">Status</a> *@
+                            @* <a href="./profile.html" class="dropdown-item">Profile</a> *@
+                            @* <a href="#" class="dropdown-item">Feedback</a> *@
+                            @* <div class="dropdown-divider"></div> *@
+
+                            <a class="dropdown-item" href="@Url.Action("Logout", "Account")">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <header class="navbar-expand-md">
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <div class="navbar">
+                    <div class="container-xxl">
+                        <ul class="navbar-nav">
+
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Home")">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                        <!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
+                                    </span>
+                                    <span class="nav-link-title">
+                                        Home
+                                    </span>
+                                </a>
+                            </li>
+                            @if (Context.User.FindFirstValue("Admin") == "Admin") 
+                            { 
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("Index", "Admin")">
+                                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-users-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4c.96 0 1.84 .338 2.53 .901" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M16 19h6" /><path d="M19 16v6" /></svg>
+                                        </span>
+                                        <span class="nav-link-title">
+                                            Register
+                                        </span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("Index", "Interview")">
+                                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-message-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 9h8" /><path d="M8 13h6" /><path d="M9 18h-3a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-3l-3 3l-3 -3z" /></svg>    
+                                        </span>
+                                        <span class="nav-link-title">
+                                            Interview
+                                        </span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("QuitClaim", "Admin")">
+                                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-rubber-stamp"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M21 17.85h-18c0 -4.05 1.421 -4.05 3.79 -4.05c5.21 0 1.21 -4.59 1.21 -6.8a4 4 0 1 1 8 0c0 2.21 -4 6.8 1.21 6.8c2.369 0 3.79 0 3.79 4.05z" /><path d="M5 21h14" /></svg>
+
+                                        </span>
+                                        <span class="nav-link-title">
+                                            Claim and Release
+                                        </span>
+                                    </a>
+                                </li>
+                            }
+                            @if (Context.User.FindFirstValue("User") == "User")
+                            {
+
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("Index", "User")">
+                                        <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                            <!-- Download SVG icon from http://tabler-icons.io/i/home -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4c.96 0 1.84 .338 2.53 .901" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M16 19h6" /><path d="M19 16v6" /></svg>
+                                        </span>
+                                        <span class="nav-link-title">
+                                            For Clearance
+                                        </span>
+                                    </a>
+                                </li> 
+
+                            }
+
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-type-doc"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M5 12v-7a2 2 0 0 1 2 -2h7l5 5v4" /><path d="M5 15v6h1a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-1z" /><path d="M20 16.5a1.5 1.5 0 0 0 -3 0v3a1.5 1.5 0 0 0 3 0" /><path d="M12.5 15a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1 -3 0v-3a1.5 1.5 0 0 1 1.5 -1.5z" /></svg>
+                                    </span>
+                                    <span class="nav-link-title">
+                                        Report
+                                    </span>
+                                </a>
+                                <div class="dropdown-menu">
+                                    @if (Context.User.FindFirstValue("User") == "User")
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("RegistrationReport", "User")">Registration Report</a>
+                                    }
+                                    @if (Context.User.FindFirstValue("Admin") == "Admin")
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("RegistrationReport", "Admin")">Registration Report</a>
+                                    }
+
+                                    @*  <a class="dropdown-item" href="@Url.Action("InterviewReport", "Interview")">Interview Report</a>
+                                     *@
+                                    @if (Context.User.FindFirstValue("User") == "User")
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("ClearReport", "User")">Clearing Report</a>
+                                    }
+                                    @if (Context.User.FindFirstValue("Admin") == "Admin")
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("ClearReport", "Admin")">Clearing Report</a>
+                                    }
+
+                                    @if (Context.User.FindFirstValue("Audit") == "Audit")
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("AuditTrail", "Report")">Audit Trail Report</a>
+                                    }
+                                </div>
+                            </li>
+
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+        </header>
+
+
+        <div class="page-wrapper">
+            @RenderBody()
+        </div>
+    </div>
+
+
+
+
+    @*confirm*@
+    <div class="modal modal-blur fade" id="confirm-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="confirm-title" class="modal-title"></div>
+                    <div id="confirm-message"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn me-auto" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger btn_finish" id="confirm-yes">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*error*@
+    <div class="modal modal-blur fade" id="error-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="error-title" class="modal-title">@TempData["Error Title"]</div>
+                    <div id="error-message">@TempData["Error Message"]</div>
+                </div>
+                <div class="modal-footer">
+                    <button id="error-ok" type="button" class="btn btn-danger" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*success*@
+    <div class="modal modal-blur fade" id="success-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="success-title" class="modal-title">@TempData["Success Title"]</div>
+                    <div id="success-message">@TempData["Success Message"]</div>
+                </div>
+                <div class="modal-footer">
+                    <button id="success-ok" type="button" class="btn btn-success" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal modal-blur fade" id="imageModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- PDF Modal -->
+    <div class="modal modal-blur fade" id="pdfModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">PDF Viewer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfViewer" src="" width="100%" height="500px" style="border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/fslightbox/index.js"></script>
+    <script src="~/lib/list.js/dist/list.js"></script>
+    <script src="~/lib/litepicker/dist/litepicker.js"></script>
+    <script src="~/lib/tom-select/dist/js/tom-select.base.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/autosize/dist/autosize.min.js"></script>
+
+
+   
+    @await RenderSectionAsync("Scripts", required: false)
+
+
+
+    <script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
+
+    <script>
+             $(document).ready(function () {
+            let $select = $(".tom-select-new-add");
+
+            // Predefined options for groups
+            let groups = {
+                "Voluntary": [
+                    "Better job", "Relocation", "Illness", "Retirement", "Family"
+                ],
+                "Involuntary": [
+                    "Redundancy", "End of Probationary", "Non-Reappointment",
+                    "Mandatory Retirement", "Disciplinary Action"
+                ],
+                "Others": [] // Empty initially but should be created
+            };
+
+            // Load predefined options into the HTML select
+            $.each(groups, function (groupName, options) {
+                let optgroup = $select.find(`optgroup[label='${groupName}']`);
+                if (optgroup.length === 0) {
+                    $select.append(`<optgroup label="${groupName}"></optgroup>`);
+                    optgroup = $select.find(`optgroup[label='${groupName}']`);
+                }
+                $.each(options, function (index, value) {
+                    optgroup.append(`<option value="${value}">${value}</option>`);
+                });
+            });
+
+            // Initialize TomSelect with optgroup order
+            let select = new TomSelect(".tom-select-new-add", {
+                persist: false,
+                create: function (input) {
+                    // Check if input already exists
+                    let exists = Object.values(select.options).some(option => option.text.toLowerCase() === input.toLowerCase());
+                    if (!exists) {
+                        // Ensure "Others" optgroup is created
+                        let $othersOptgroup = $select.find("optgroup[label='Others']");
+                        if ($othersOptgroup.length === 0) {
+                            $select.append(`<optgroup label="Others"></optgroup>`);
+                            $othersOptgroup = $select.find("optgroup[label='Others']");
+                        }
+
+                        // Add new value to the "Others" group
+                        select.addOption({ value: input, text: input, optgroup: "Others" });
+                        $othersOptgroup.append(`<option value="${input}" selected>${input}</option>`);
+                    }
+                    return input;
+                },
+                render: {
+                    option: function (data, escape) {
+                        return '<div class="py-1">' + escape(data.text) + '</div>';
+                    },
+                    optgroup_header: function (data, escape) {
+                        return `<div class="optgroup-header">${escape(data.label)}</div>`;
+                    }
+                }
+            });
+        });
+
+    </script>
+
+
+
+ 
+
+
+
+    <script>
+        $(document).ready(function () {
+            // Handle Image Preview
+            $('a[data-bs-target="#imageModal"]').click(function () {
+                let imgSrc = $(this).attr('data-img-src');
+                $('#modalImage').attr('src', imgSrc);
+            });
+
+            // Handle PDF Preview
+            $('a[data-bs-target="#pdfModal"]').click(function () {
+                let pdfSrc = $(this).attr('data-pdf-src');
+                $('#pdfViewer').attr('src', pdfSrc);
+            });
+        });
+    </script>
+
+
+    <script>
+    document.addEventListener('input', function (e) {
+        if (e.target.tagName === 'TEXTAREA' && e.target.hasAttribute('data-bs-autosize')) {
+            e.target.style.height = 'auto'; // Reset the height to auto
+            e.target.style.height = e.target.scrollHeight + 'px'; // Adjust to content height
+        }
+    });
+
+    // Initialize autosizing on page load for textareas with content
+    document.querySelectorAll('textarea[data-bs-autosize]').forEach(function (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    });
+</script>
+
+    <script>
+
+         // Autosize initialization for text areas
+        $(document).ready(function () {
+            autosize($('[data-bs-toggle="autosize"]'));
+        });
+
+
+
+
+
+        $(document).ready(function () {
+            // Check for saved user theme, if any, on load of the webpage
+            const savedTheme = localStorage.getItem('theme') || 'light'; // default to light if no theme is found
+            $('body').attr('data-bs-theme', savedTheme);
+
+            // Dark mode click event
+            $('#dark-mode').on('click', function (event) {
+                event.preventDefault();
+                setTheme('dark');
+            });
+
+            // Light mode click event
+            $('#light-mode').on('click', function (event) {
+                event.preventDefault();
+                setTheme('light');
+            });
+
+            function setTheme(theme) {
+                $('body').attr('data-bs-theme', theme);
+                localStorage.setItem('theme', theme);
+            }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            if ($("#success-title").html() != "") {
+                $("#success-modal").modal("show")
+            }
+
+            if ($("#error-title").html() != "") {
+                $("#error-modal").modal("show")
+            }
+
+
+        })
+
+        $(".date-input").each(function () {
+            var today = new Date(); // Get today's date
+            new Litepicker({
+                element: this,
+                buttonText: {
+                    previousMonth: `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>`,
+                    nextMonth: `<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>`,
+                },
+
+                firstDay: 0,
+
+            });
+        })
+
+    
+
+        $('.tom-select').each(function () {
+            var data = $(this);
+            new TomSelect(data.get(0), {
+                copyClassesToDropdown: false,
+                dropdownParent: 'body',
+                controlInput: '<input>',
+                render: {
+                    item: function (data, escape) {
+                        if (data.customProperties) {
+                            return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+                        }
+                        return '<div>' + escape(data.text) + '</div>';
+                    },
+                    option: function (data, escape) {
+                        if (data.customProperties) {
+                            return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+                        }
+                        return '<div>' + escape(data.text) + '</div>';
+                    },
+                },
+            });
+        });
+
+        $('.tom-select-subtitle').each(function () {
+            var data = $(this);
+            new TomSelect(data.get(0), {
+                copyClassesToDropdown: false,
+                dropdownParent: 'body',
+                controlInput: '<input>',
+                searchField: ['text', 'subtitle'],
+                render: {
+                    item: function (data, escape) {
+                        return '<div><span class="d-block">' + escape(data.text) + '</span></div>';
+                    },
+                    option: function (data, escape) {
+                        return '<div><span class="d-block">' + escape(data.text) + '</span><span class="d-block fs-5 opacity-70">' + escape(data.subtitle) + '</span></div>';
+                    },
+                },
+            });
+        });
+
+
+
+        $('.tom-select-subtitle2').each(function () {
+            var data = $(this);
+            new TomSelect(data.get(0), {
+                copyClassesToDropdown: false,
+                dropdownParent: 'body',
+                controlInput: '<input>',
+                render: {
+                    item: function (data, escape) {
+                        return '<div><span class="d-block">' + escape(data.text) + '</span></div>';
+                    },
+                    option: function (data, escape) {
+                        return '<div><span class="d-block">' + escape(data.text) + '</span><span class="d-block fs-5 opacity-70">' + escape(data.subtitle) + '</span><span class="d-block fs-5 opacity-70"> ' + escape(data.subtitle2) + '</span></div>';
+                    },
+                },
+            });
+        });
+
+        $('.tom-select-add').each(function () {
+            var data = $(this);
+            new TomSelect(data.get(0), {
+                copyClassesToDropdown: false,
+                dropdownParent: 'body',
+                controlInput: '<input>',
+                render: {
+                    item: function (data, escape) {
+                        return '<div><span class="d-block">' + escape(data.text) + '</span></div>';
+                    },
+                    option: function (data, escape) {
+                        return '<div>' +
+                            '<span class="d-block">' + escape(data.text) + '</span>' +
+                            '<span class="d-block fs-5 opacity-70">' + escape(data.subtitle || '') + '</span>' +
+                            '<span class="d-block fs-5 opacity-70">' + escape(data.subtitle2 || '') + '</span>' +
+                            '</div>';
+                    }
+                },
+                create: true, // Allows adding new items
+                createOnBlur: true // Automatically creates an item when focus is lost
+            });
+        });
+
+        $(".check").change(function () {
+            if ($(this).prop('checked')) {
+
+                $(this).parent().parent().find(".date-input").val("1991-01-01")
+                return
+            }
+
+            $(this).parent().parent().find(".date-input").val("2024-01-01")
+
+        })
+
+        //datatable
+        var columns = [];
+        $(".table-thead").find(".table-sort").each(function () {
+            columns.push($(this).data("sort"));
+        });
+
+        const list = new List('table-default', {
+            sortClass: 'table-sort',
+            listClass: 'table-tbody',
+            page: 10,
+            pagination: true,
+            valueNames: columns
+        });
+
+        $("#entries").change(function () {
+            list.page = $(this).val();
+            list.update();
+        });
+
+
+        // Function to update profile count
+        function updateProfileCount() {
+            const totalItems = list.size();
+
+            $("#profileCount").text(`${totalItems} people`);
+        }
+
+        // Update profile count on initialization
+        updateProfileCount();
+
+        // Update profile count on page change
+        list.on('updated', function () {
+            updateProfileCount();
+        });
+    </script>
+
+
+    // <script>
+    //     var columns = [];
+    //       $(".table-thead1").find(".table-sort").each(function () {
+    //           columns.push($(this).data("sort"));
+    //       });
+
+    //       const list = new List('table-default', {
+    //           sortClass: 'table-sort',
+    //           listClass: 'table-tbody',
+    //           page: 10,
+    //           pagination: true,
+    //           valueNames: columns
+    //       });
+
+    //       $("#entries").change(function () {
+    //           list.page = $(this).val();
+    //           list.update();
+    //       });
+    // </script>
+</body>
+</html>

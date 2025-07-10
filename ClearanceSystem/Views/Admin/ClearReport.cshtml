@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Clearing Reports";
+}
+
+@model Registration
+
+<div class="page-header d-print-none">
+    <div class="container-xxl">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">
+                    Report - Clearing
+                    <h2 class="page-title">
+                        Clearing Reports
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-auto ms-auto d-print-none">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xxl ">
+        <div class="card">
+            <div id="table-default">
+                <div class="col- d-lg-flex px-3 pt-3">
+                    <div class="d-flex text-center text-lg-start mb-3">
+                        <div class="text-muted">
+                            Show
+                            <div class="mx-2 d-inline-block w-25">
+                                <input id="entries" type="number" class="form-control" value="10" autocomplete="off">
+                            </div>
+                            entries
+                        </div>
+                    </div>
+
+
+                    <div class="input-icon mb-3 ms-auto">
+                        <input type="search" class="search form-control" placeholder="Search">
+                        <span class="input-icon-addon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+                        </span>
+
+                    </div>
+
+                </div>
+                <hr class="m-0">
+
+                <div class="table-responsive">
+                    <table class="table text-muted table-mobile-sm" id="datatable">
+                        <thead class="table-thead">
+                            <tr>
+                                <th>Status</th>
+                                <th><button class="table-sort" data-sort="sort-ID">Registration ID</button></th>
+                                <th><button class="table-sort" data-sort="sort-EmpId">Employee ID</button></th>
+                                <th><button class="table-sort" data-sort="sort-EmpName">Employee Name</button></th>
+                                <th><button class="table-sort" data-sort="sort-Department">Department</button></th>
+                                <th><button class="table-sort" data-sort="sort-Clear">Cleared By</button></th>
+                                <th><button class="table-sort" data-sort="sort-cDate">Cleared Date</button></th>
+                                <th><button class="table-sort" data-sort="sort-as">Cleared As</button></th>
+                                <th><button class="table-sort" data-sort="sort-Remarks">Remarks</button></th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="table-tbody">
+                            @if (Model.clearList == null || !Model.clearList.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center">NO DATA AVAILABLE</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.clearList)
+                                {
+                                    <tr>
+                                        @{
+                                            string badgeClass = "bg-secondary-lt";
+
+                                            switch (row.Status)
+                                            {
+                                                case "Pending":
+                                                    badgeClass = "bg-danger-lt";
+
+                                                    break;
+                                                case "Cleared":
+                                                    badgeClass = "bg-success-lt";
+                                                    break;
+                                                
+                                            }
+
+                                        }
+
+                                        <td data-label="Status">
+                                            <span class="badge @badgeClass">@row.Status</span>
+                                        </td>
+                                        <td data-label="Registration ID" class="text-nowrap sort-ID">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.RId</a>
+                                        </td>
+                                       
+                                        <td data-label="Employee ID" class="text-nowrap sort-EmpId">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.EmpId</a>
+                                        </td>
+                                        <td data-label="Employee Name" class="text-nowrap sort-EmpName">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.EmpName</a>
+                                        </td>
+                                        <td data-label="Department" class="text-nowrap sort-Department">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.depName</a>
+                                        </td>
+                                        <td data-label="Cleared By" class="text-nowrap sort-Clear">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.UpdatedBy</a>
+                                        </td>
+                                        <td data-label="Cleared Date" class="text-nowrap sort-cDate">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.UpdatedDate</a>
+                                        </td>
+                                        <td data-label="Cleared As" class="text-nowrap sort-as">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Type</a>
+                                        </td>
+
+
+                                        <td data-label="Remarks" class="text-nowrap sort-Remarks @(row.withIssue ? "bg-red-lt" : "")">
+                                            <a href="/Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Remarks</a>
+                                        </td>
+
+
+
+
+                                    </tr>
+
+                                }
+                            }
+
+
+                        </tbody>
+
+
+                    </table>
+                </div>
+
+                <div class="card-footer d-flex align-items-center">
+                    <ul class="pagination m-0 ms-auto"></ul>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>

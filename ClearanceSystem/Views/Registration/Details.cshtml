@@ -1,0 +1,278 @@
+﻿@{
+    ViewData["Title"] = "Details";
+}
+
+@model Registration
+
+<div class="page-header d-print-none">
+    <div class="container-fluid">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+                @{
+                    string badgeClass = "bg-secondary-lt";
+                    string badgeText = "Inactive";
+                    switch (Model.Status)
+                    {
+                        case "Pending":
+                            badgeClass = "bg-danger-lt";
+                            badgeText = "Pending";
+                            break;
+                        case "Cleared by Department":
+                            badgeClass = "bg-warning-lt";
+                            badgeText = "Cleared by Department";
+                            break;
+                        case "Cleared by Accounting":
+                            badgeClass = "bg-warning-lt";
+                            badgeText = "Cleared by Accounting";
+                            break;
+                        case "Cleared by Audit":
+                            badgeClass = "bg-warning-lt";
+                            badgeText = "Cleared by Audit";
+                            break;
+                        case "Cleared by I.T":
+                            badgeClass = "bg-warning-lt";
+                            badgeText = "Cleared by I.T";
+                            break;
+                        case "Cleared by Q.A":
+                            badgeClass = "bg-warning-lt";
+                            badgeText = "Cleared by Q.A";
+                            break;
+                        case "Cleared by E.Q.S":
+                            badgeClass = "bg-warning-lt";
+                            badgeText = "Cleared by E.Q.S";
+                            break;
+                        case "Cleared":
+                            badgeClass = "bg-success-lt";
+                            badgeText = "Cleared";
+                            break;
+                    }
+                }
+
+                <div class="page-pretitle d-flex align-items-center">
+                    <h2 class="page-title mb-0">
+                        Clearance Details
+                    </h2>
+                    <span class="badge @badgeClass ms-3">@badgeText</span> <!-- Example Status Badge -->
+                </div>
+            </div>
+
+
+            <div class="col-auto ms-auto d-print-none">
+               
+                <button class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                    CLEAR
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!-- Form for submitting selected assets -->
+@using (Html.BeginForm("Turnover", "Registration", FormMethod.Post, new { id = "form-turnover" }))
+{
+ <div class="page-body">
+        <div class="row">
+            <!-- Left Column: Employee Information -->
+            <div class="col-lg-3 col-md-12 p-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Employee Details -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Employee ID</label>
+                                <p class="form-control-plaintext text-muted">@Model.EmpId</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Employee Name</label>
+                                <p class="form-control-plaintext text-muted">@Model.Name</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Position</label>
+                                <p class="form-control-plaintext text-muted">@Model.position</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Department</label>
+                                <p class="form-control-plaintext text-muted">@Model.DepartmentName</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Date Hired</label>
+                                <p class="form-control-plaintext text-muted">@Model.DateHired?.ToString("MM/dd/yyyy")</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Last Day</label>
+                                <p class="form-control-plaintext text-muted">@Model.LastDay?.ToString("MM/dd/yyyy")</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Remarks</label>
+                                <p class="form-control-plaintext text-muted">@Model.Remarks</p>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <p class="form-control-plaintext text-muted">@Model.Description</p>
+                            </div>
+                        </div>
+                    </div>`
+                </div>
+            </div>
+            @if (Context.User.FindFirstValue("department") == Model.DepartmentName && Model.Status == "Pending") 
+            {
+                <!-- Right Column: Turnover Checklist -->
+                <div class="col-lg-9 col-md-12 p-3">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Turnover Checklist</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Table Controls -->
+                            <div class="d-flex justify-content-between align-items-center mb-3 px-3 pt-3">
+                                <div class="d-flex text-center text-lg-start mb-3">
+                                    <div class="text-muted">
+                                        Show
+                                        <div class="mx-2 d-inline-block w-25">
+                                            <input id="entries" type="number" class="form-control" value="10" autocomplete="off">
+                                        </div>
+                                        entries
+                                    </div>
+                                </div>
+                                <div class="input-icon mb-3">
+                                    <input type="search" class="search form-control" placeholder="Search">
+                                    <span class="input-icon-addon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                                            <path d="M21 21l-6 -6" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped" id="selectedItemsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="checkAll" class="form-check-input" />
+                                        </th>
+                                        <th>ID</th>
+                                        <th>Description</th>
+                                        <th>Specification</th>
+                                        <th>Asset Number</th>
+                                        <th>Serial Number</th>
+                                        <th>Owner Name</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.assetList == null || !Model.assetList.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted">No Data Available</td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var checkboxIndex = 0;
+                                        foreach (var row in Model.assetList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @Html.CheckBoxFor(m => m.assetList[checkboxIndex].IsSelected, new { @class = "form-check-input asset-checkbox", id = "checkbox-@checkboxIndex", @checked = "checked" })
+                                                  
+                                                </td>
+                                                <td>
+                                                    @row.AId
+                                                    @Html.HiddenFor(m => m.assetList[checkboxIndex].AId, new { @class = "form-control" })
+                                                </td>
+                                                <td>@row.Description</td>
+                                                <td>@row.Specs</td>
+                                                <td>@row.AssetNo</td>
+                                                <td>@row.SerialNo</td>
+                                                <td>
+                                                    @row.OwnerName
+                                                    @Html.HiddenFor(m => m.assetList[checkboxIndex].OwnerName, new { @class = "form-control" })
+                                                </td>
+                                                <td>@row.Location</td>
+                                            </tr>
+                                            checkboxIndex++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                            <!-- Pagination -->
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-end gap-3 col-auto ms-auto d-print-none">
+                                    <button class="btn btn-danger btnTurnover">Turnover</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+
+
+            }
+
+            
+
+        
+
+        </div>
+    </div> 
+
+}
+   
+
+
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            // Initialize the "Check All" checkbox based on the state of individual checkboxes
+            const initializeCheckAll = function () {
+                const assetCheckboxes = $('.asset-checkbox');
+                const checkAll = $('#checkAll');
+                const allChecked = assetCheckboxes.length > 0 && assetCheckboxes.filter(':checked').length === assetCheckboxes.length;
+                checkAll.prop('checked', allChecked);
+            };
+
+            // When the "Check All" checkbox is clicked
+            $('#checkAll').click(function () {
+                const isChecked = $(this).prop("checked");
+                $('.asset-checkbox').prop('checked', isChecked); // Set all individual checkboxes to the same state
+            });
+
+            // When any individual checkbox is clicked
+            $(document).on('click', '.asset-checkbox', function () {
+                initializeCheckAll(); // Update the "Check All" checkbox
+            });
+
+            // Initialize on page load
+            initializeCheckAll();
+
+            // Handle the Turnover button click event (form submission)
+            $('.btnTurnover').on('click', function () {
+                var selectedAssets = [];
+
+                // Collect the selected asset IDs
+                $('.asset-checkbox:checked').each(function () {
+                    selectedAssets.push($(this).val());
+                });
+
+                // Set the selected asset IDs in the hidden input field
+                $('#turnoverList').val(selectedAssets.join(','));
+
+                // Submit the form
+                $('#form-turnover').submit(); // Regular form submission
+            });
+        });
+    </script>
+    }
+
+
+

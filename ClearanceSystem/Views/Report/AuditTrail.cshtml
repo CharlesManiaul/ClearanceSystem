@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Audit Trail Report";
+}
+
+@model Reports
+
+
+<div class="page-header d-print-none">
+    <div class="container-xxl">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">
+                    Reports - Audit Tral
+                    <h2 class="page-title">
+                        Audit Trail Report
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-auto ms-auto d-print-none">
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="page-body">
+    <div class="container-xxl ">
+        <div class="card">
+            <div id="table-default">
+                <div class="col- d-lg-flex px-3 pt-3">
+
+                    <div class="d-flex text-center text-lg-start mb-3">
+                        <div class="text-muted">
+                            Show
+                            <div class="mx-2 d-inline-block w-25">
+                                <input id="entries" type="number" class="form-control" value="10" autocomplete="off">
+                            </div>
+                            entries
+                        </div>
+
+                    </div>
+
+                    <div class="input-icon mb-3 ms-auto">
+                        <input type="search" class="search form-control" placeholder="Search">
+                        <span class="input-icon-addon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+                        </span>
+
+                    </div>
+                </div>
+
+
+                <hr class="m-0">
+
+                <div class="table-responsive">
+                    <table class="table text-muted table-mobile-sm" id="datatable" data-filename="Registration">
+                        <thead class="table-thead">
+                            <tr>
+                                <th><button class="table-sort" data-sort="sort-action">Action</button></th>
+                                <th><button class="table-sort" data-sort="sort-remarks">Remarks</button></th>
+                                <th><button class="table-sort" data-sort="sort-crtdBy">Created By</button></th>
+                                <th><button class="table-sort" data-sort="sort-crtdDate">Created Date</button></th>
+                                @* <th>Action</th> *@
+                            </tr>
+                        </thead>
+                        <tbody class="table-tbody">
+                            @if (Model.report == null || !Model.report.Any())
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center">NO DATA AVAILABLE</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.report)
+                                {
+                                    <tr>
+                                        <td data-label="Action" class="text-nowrap sort-action">
+                                            <a class="text-decoration-none theme-text">@row.action</a>
+                                        </td>
+                                        <td data-label="Remarks" class="text-nowrap sort-remarks">
+                                            <a class="text-decoration-none theme-text">@row.remarks</a>
+                                        </td>
+                                        <td data-label="Created By" class="text-nowrap sort-crtdBy">
+                                            <a class="text-decoration-none theme-text">@row.createdBy</a>
+                                        </td>
+                                        <td data-label="Created Date" class="text-nowrap sort-crtdDate">
+                                            <a class="text-decoration-none theme-text">@row.createdDate</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="card-footer d-flex align-items-center">
+                    <ul class="pagination m-0 ms-auto"></ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

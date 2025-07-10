@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+    
+        <div class="container-xl mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Pending Requests</h3>
+                            <p>View and manage pending clearance requests.</p>
+                            @if (Context.User.FindFirstValue("User") == "User")
+                            {
+                            <a href="@Url.Action("RegistrationReport", "User")" class="btn btn-primary">View Requests</a>
+                            }
+
+                            @if (Context.User.FindFirstValue("Admin") == "Admin")
+                            {
+                            <a href="@Url.Action("RegistrationReport", "Admin")" class="btn btn-primary">View Requests</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">Approved Clearances</h3>
+                            <p>Check previously approved clearance requests.</p>
+                            @if (Context.User.FindFirstValue("Admin") == "Admin")
+                            {
+                                <a href="@Url.Action("ApprovedReport", "Admin")" class="btn btn-primary">View Approved</a>
+                            }
+                            @if (Context.User.FindFirstValue("User") == "User")
+                            {
+                        <a href="@Url.Action("ApprovedReport", "User")" class="btn btn-primary">View Approved</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+                @* <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">User Management</h3>
+                            <p>Manage user roles and permissions.</p>
+                            <a href="#" class="btn btn-warning">Manage Users</a>
+                        </div>
+                    </div>
+                </div> *@
+            </div>
+        </div>

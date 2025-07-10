@@ -1,0 +1,1356 @@
+﻿@{
+    ViewData["Title"] = "Details";
+}
+@{
+    string badgeClass = "bg-secondary-lt";
+    string badgeText = "Inactive";
+    switch (Model.Status)
+    {
+        case "Pending":
+            badgeClass = "bg-danger-lt";
+            badgeText = "Pending";
+            break;
+
+        case "For Final Approval":
+            badgeClass = "bg-warning-lt";
+            badgeText = "For Final Approval";
+            break;
+        case "Cleared":
+            badgeClass = "bg-success-lt";
+            badgeText = "Cleared";
+            break;
+    }
+}
+
+@{
+    var statusLookup = Model.clearList
+        .GroupBy(x => x.ClearedBy)
+        .ToDictionary(g => g.Key, g => g.Select(x => x.Status).ToList());
+
+    bool isDepartmentComplete =
+        statusLookup.TryGetValue("Manager", out var mgr) && mgr.Contains("Cleared") &&
+        statusLookup.TryGetValue("Supervisor", out var sup) && sup.Contains("Cleared") &&
+        statusLookup.TryGetValue("Turnover", out var turn) && turn.Contains("Cleared");
+
+    bool isAccountingComplete =
+        statusLookup.TryGetValue("Cash Advance", out var ca) && ca.Contains("Cleared") &&
+        statusLookup.TryGetValue("Company Loan", out var loan) && loan.Contains("Cleared") &&
+        statusLookup.TryGetValue("Deductions", out var ded) && ded.Contains("Cleared");
+
+    bool isOthersComplete =
+        statusLookup.TryGetValue("IT", out var it) && it.Contains("Cleared") &&
+        statusLookup.TryGetValue("AUDIT", out var audit) && audit.Contains("Cleared") &&
+        statusLookup.TryGetValue("QA", out var qa) && qa.Contains("Cleared") &&
+        statusLookup.TryGetValue("EQS", out var eqs) && eqs.Contains("Cleared");
+
+    bool isAdminComplete =
+        statusLookup.TryGetValue("Company ID", out var id) && id.Contains("Cleared") &&
+        statusLookup.TryGetValue("Leave Credits", out var leave) && leave.Contains("Cleared") &&
+        statusLookup.TryGetValue("ERS", out var ers) && ers.Contains("Cleared");
+
+    Model.DepartmentStatus = isDepartmentComplete ? "Department Complete" : "";
+    Model.AccountingStatus = isAccountingComplete ? "Accounting Complete" : "";
+    Model.OtherStatus = isOthersComplete ? "Others Complete" : "";
+    Model.AdminStatus = isAdminComplete ? "Admin/HR Complete" : "";
+
+    bool isClearanceComplete = !string.IsNullOrWhiteSpace(Model.DepartmentStatus) &&
+                               !string.IsNullOrWhiteSpace(Model.AccountingStatus) &&
+                               !string.IsNullOrWhiteSpace(Model.OtherStatus) &&
+                               !string.IsNullOrWhiteSpace(Model.AdminStatus);
+}
+
+
+@model Registration
+
+<style>
+    .table {
+        table-layout: fixed; /* Enforces equal width */
+        width: 100%; /* Ensure the table uses full width */
+    }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+            text-align: center;
+            white-space: nowrap;
+            padding: 0.75rem;
+            height: 60px; /* Equal row height */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Optional: show ... if text overflows */
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+</style>
+
+
+<div class="page-header d-print-none">
+    <div class="container-xxl">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+
+                <div class="page-pretitle d-flex align-items-center">
+                    <h2 class="page-title mb-0">
+                        Clearance Details
+                    </h2>
+
+                </div>
+            </div>
+
+
+            <div class="col-auto ms-auto d-print-none">
+                @if (isClearanceComplete && Model.Status == "Pending")
+                {
+                    <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#finishClearanceModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                        CLEAR
+                    </a>
+                }
+
+                @if (Model.Status == "For Final Approval" && Context.User.HasClaim("username", "09930"))
+                {
+                    <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approveClearanceModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                        Approve
+                    </a>
+
+                }
+
+                @if (isClearanceComplete && Model.Status == "Cleared")
+                {
+                    @using (Html.BeginForm("Print", "Admin", FormMethod.Post, new { id = "form-print" }))
+                    {
+                        @Html.HiddenFor(m => m.RId)
+                        @Html.HiddenFor(m => m.Company)
+                        @Html.HiddenFor(m => m.EmpId)
+                        <button class="btn btn-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-printer"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" /></svg>
+                            PRINT
+                        </button>
+                    }
+                }
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+
+<div class="page-body">
+    <div class="container-xxl">
+        <!-- Left Column: Employee Information -->
+        <div class="col ">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <span class="badge @badgeClass">@badgeText</span>
+
+                    <h5 class="card-title m-0">@Model.Name</h5>
+                    <div class="mb-0 text-muted">@Model.EmpId</div>
+
+                    <div class="d-flex flex-wrap align-items-start gap-3">
+                        <!-- Left: Employee Info Table -->
+                        <div>
+                            <table class="mt-3">
+                                <tr>
+                                    <td>Hired: </td>
+                                    <td class="text-muted ps-5">@Model.DateHired?.ToString("MM/dd/yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td>Last Day: </td>
+                                    <td class="text-muted ps-5">@Model.LastDay?.ToString("MM/dd/yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td>Department: </td>
+                                    <td class="text-muted ps-5">@Model.DepartmentName</td>
+                                </tr>
+                                <tr>
+                                    <td>Position: </td>
+                                    <td class="text-muted ps-5">@Model.position</td>
+                                </tr>
+                                <tr>
+                                    <td>Reason: </td>
+                                    <td class="text-muted ps-5">@Model.Description</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Right: Attachments -->
+                        <div>
+                            <h6 class="mb-2">Attachments</h6>
+                            @if (Model.attachment != null && Model.attachment.Any())
+                            {
+                                <ul class="list-unstyled">
+                                    @foreach (var file in Model.attachment.Where(m => m.RefType == "RId"))
+                                    {
+                                        <li>
+
+
+                                            @*              <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )" target="_blank"
+                                    style="text-decoration: none; color: inherit;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
+                                    @file.FileName
+                                    </a>
+                                    *@
+                                            <a data-fslightbox="RId" href="@(file.FileName.Contains(".pdf")?"#" + file.FileName:"/Admin/GetDetails?FileName=" + file.FileName)" class="text-decoration-none" style="text-decoration: none; color: inherit;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
+                                                @file.FileName
+                                            </a>
+
+                                            <div class="d-none">
+                                                <iframe src="@Url.Action("GetDetails", "Admin", new { file.FileName} )" id="@file.FileName" width="1920px" height="1080px"></iframe>
+                                            </div>
+
+
+
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No attachments available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-5" id="departmentTab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">Assigned Department</label>
+                            @if (Context.User.FindFirstValue("department") == Model.DepartmentName)
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearUserModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.Type == "Same Department").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.Type == "Same Department"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )"
+                                                           target="_blank"
+                                                           style="text-decoration: none; color: inherit;">
+                                                            @file.FileName
+                                                        </a>
+                                                        <br /> <!-- Show each file on a new line -->
+                                                    }
+
+                                                </td>
+
+                                                @*  <td>
+                                                        <a class="btn btn-warning py-1 px-2">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                                            Clear
+                                                        </a>
+                                                    </td> *@
+
+
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                    <!-- Turnover Checklist -->
+                    @using (Html.BeginForm("Turnover", "Admin", FormMethod.Post, new { id = "form-turnover" }))
+                    {
+
+                        @if (Model.assetList.Count() > 0)
+                        {
+                            <div id="turnovertab">
+                                <div class="d-flex mb-2">
+                                    <label class="form-label">Turnover Asset</label>
+
+                                    <a type="button" class="btn btn-danger ms-auto py-1 px-2" data-bs-toggle="modal" data-bs-target="#turnoverModal">Turnover</a>
+                                </div>
+
+                                <!-- Turnover Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped table-bordered" id="selectedItemsTable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>
+                                                    <input type="checkbox" id="checkAll" class="form-check-input" />
+                                                </th>
+                                                <th>ID</th>
+                                                <th>Description</th>
+                                                <th>Specification</th>
+                                                <th>Asset Number</th>
+                                                <th>Serial Number</th>
+                                                <th>Owner Name</th>
+                                                <th>Location</th>
+                                            </tr>
+                                        </thead>
+
+
+                                        @Html.HiddenFor(m => m.RId)
+                                        @Html.HiddenFor(m => m.Employee.Name, new { id = "TName" })
+                                        @Html.HiddenFor(m => m.Employee.Remarks, new { id = "TRemarks" })
+                                        @Html.HiddenFor(m => m.Employee.EmpId, new { id = "TEmpId" })
+                                        <tbody>
+
+                                            @for (int i = 0; i < Model.assetList.Count(); i++)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @Html.CheckBoxFor(m => m.assetList[i].IsSelected, new { @class = "form-check-input asset-checkbox", id = "checkbox-@checkboxIndex", @checked = "checked" })
+                                                    </td>
+                                                    <td>
+                                                        @Model.assetList[i].AId
+                                                        @Html.HiddenFor(m => m.assetList[i].AId)
+                                                    </td>
+                                                    <td>@Model.assetList[i].Description</td>
+                                                    <td>@Model.assetList[i].Specs</td>
+                                                    <td>@Model.assetList[i].AssetNo</td>
+                                                    <td>@Model.assetList[i].SerialNo</td>
+                                                    <td>
+                                                        @Model.assetList[i].OwnerName
+                                                        @Html.HiddenFor(m => m.assetList[i].OwnerName)
+                                                    </td>
+                                                    <td>@Model.assetList[i].Location</td>
+                                                </tr>
+
+                                            }
+                                        </tbody>
+                                    </table>
+
+
+                                </div>
+
+                            </div>
+                        }
+                    }
+
+
+
+
+
+
+
+                    <div class="mb-5" id="accountingTab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">Accounting Department</label>
+                            @if (Context.User.FindFirstValue("department").Equals("ACCOUNTING", StringComparison.OrdinalIgnoreCase) ||
+                            Context.User.FindFirstValue("department").Equals("FINANCE", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+                                        @* <th>Action</th> *@
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.Type == "Accounting").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.Type == "Accounting"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )"
+                                                           target="_blank"
+                                                           style="text-decoration: none; color: inherit;">
+                                                            @file.FileName
+                                                        </a>
+                                                        <br />
+                                                    }
+                                                </td>
+
+
+
+                                                @*   <td>
+                                                        <a class="btn btn-warning py-1 px-2"> 
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                                            Clear
+                                                        </a>
+                                                    </td> *@
+
+
+
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+
+
+                    @*  <!-- Cash Advance -->
+                    @if (User.IsInRole("CAApprover"))
+                    {
+                    <label class="form-label">Cash Advance</label>
+
+                    <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                    <thead class="table-light">
+                    <tr>
+                    <th>Status</th>
+                    <th>Department</th>
+                    <th>Personnel</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.cashAdvance == null || !Model.cashAdvance.Any())
+                    {
+                    <tr>
+                    <td colspan="5" class="text-center text-muted">No Data Available</td>
+                    </tr>
+                    }
+                    else
+                    {
+                    foreach (var row in Model.cashAdvance)
+                    {
+                    <tr>
+                    <td>@row.Status</td>
+                    <td>@row.DepName</td>
+                    <td>@row.personnel</td>
+                    <td>@row.amount</td>
+                    <td>@row.description</td>
+                    </tr>
+                    }
+                    }
+                    </tbody>
+                    </table>
+                    </div>
+
+                    @if (Model.cashAdvance != null && Model.cashAdvance.Any())
+                    {
+                    <div class="d-flex justify-content-end gap-3 col-auto ms-auto d-print-none p-3">
+                    <button class="btn btn-success btnRedirect">Go To EMS</button>
+                    </div>
+                    }
+                    } *@
+
+
+
+                    <div class="mb-5" id="ITtab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">IT Department</label>
+                            @if (User.IsInRole("IT"))
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+                                        @* <th>Action</th> *@
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.ClearedBy == "IT").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.ClearedBy == "IT"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )"
+                                                           target="_blank"
+                                                           style="text-decoration: none; color: inherit;">
+                                                            @file.FileName
+                                                        </a>
+                                                        <br /> <!-- Show each file on a new line -->
+                                                    }
+
+                                                </td>
+
+                                                @*  <td>
+                                                    <a class="btn btn-warning py-1 px-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                                        Clear
+                                                    </a>
+                                                </td>
+ *@
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-5" id="EQStab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">EQS Department</label>
+                            @if (User.IsInRole("EQS"))
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+                                        @* <th>Action</th> *@
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.ClearedBy == "EQS").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.ClearedBy == "EQS"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )"
+                                                           target="_blank"
+                                                           style="text-decoration: none; color: inherit;">
+                                                            @file.FileName
+                                                        </a>
+                                                        <br /> <!-- Show each file on a new line -->
+                                                    }
+
+                                                </td>
+                                                @* 
+                                                             <td>
+                                                                <a class="btn btn-warning py-1 px-2">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                                                    Clear
+                                                                </a>
+                                                            </td> *@
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mb-5" id="AuditTab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">Audit Department</label>
+                            @if (User.IsInRole("AUDIT"))
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+                                        @* <th>Action</th> *@
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.ClearedBy == "AUDIT").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.ClearedBy == "AUDIT"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )"
+                                                           target="_blank"
+                                                           style="text-decoration: none; color: inherit;">
+                                                            @file.FileName
+                                                        </a>
+                                                        <br /> <!-- Show each file on a new line -->
+                                                    }
+
+                                                </td>
+
+                                                @* <td>
+                                                    <a class="btn btn-warning py-1 px-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                                        Clear
+                                                    </a> 
+                                                </td>*@
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mb-5" id="QATab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">QA Department</label>
+                            @if (User.IsInRole("QA"))
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+                                        @* <th>Action</th> *@
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.ClearedBy == "QA").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.ClearedBy == "QA"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a href="@Url.Action("GetDetails", "Admin", new { file.FileName} )"
+                                                           target="_blank"
+                                                           style="text-decoration: none; color: inherit;">
+                                                            @file.FileName
+                                                        </a>
+                                                        <br /> <!-- Show each file on a new line -->
+                                                    }
+
+                                                </td>
+                                                @* <td>
+                                                    <a class="btn btn-warning py-1 px-2">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                                        Clear
+                                                    </a>
+                                                </td> *@
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
+                    <div class="mb-5" id="AdminTab">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label">HR/Admin Department</label>
+
+                            @if (Model.userRoles.Any() && Model.Status == "Pending")
+                            {
+                                <button type="button" class="btn btn-cyan ms-auto py-1 px-2 " data-bs-toggle="modal" data-bs-target="#clearModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-checks"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 12l5 5l10 -10" /><path d="M2 12l5 5m5 -5l5 -5" /></svg>
+                                    Clear
+                                </button>
+                            }
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Id</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                        <th>Cleared By</th>
+                                        <th>Cleared Date</th>
+                                        <th>Attachment</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @if (!Model.clearList.Where(m => m.Type == "Admin/HR").Any())
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-3">
+                                                <em>No data available</em>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var index = 1;
+                                        @foreach (var row in Model.clearList.Where(m => m.Type == "Admin/HR"))
+                                        {
+                                            <tr>
+                                                <td>@row.ClearedBy</td>
+                                                <td>@index</td> <!-- Start at 1 and increment -->
+                                                <td>@row.Status</td>
+                                                <td>@row.Remarks</td>
+                                                <td>@row.UpdatedBy</td>
+                                                <td>@row.UpdatedDate</td>
+                                                <td data-label="File Name" class="text-nowrap sort-Description">
+
+                                                    @foreach (var file in Model.attachment.Where(m => m.RefId == row.CId))
+                                                    {
+                                                        <a data-fslightbox="HRId" href="@(file.FileName.Contains(".pdf")?"#" + file.FileName:"/Admin/GetDetails?FileName=" + file.FileName)" class="text-decoration-none" style="text-decoration: none; color: inherit;">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
+                                                            @file.FileName
+                                                        </a>
+                                                        <br /> <!-- Show each file on a new line -->
+                                                        <div class="d-none">
+                                                            <iframe src="@Url.Action("GetDetails", "Admin", new { file.FileName} )" id="@file.FileName" width="1920px" height="1080px"></iframe>
+                                                        </div>
+                                                    }
+
+                                                </td>
+                                            </tr>
+                                            index++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @if (Model.Status == "For Final Approval" || Model.Status == "Cleared")
+                    {
+                        <div class="card-footer">
+                            @foreach (var item in new[] {
+                        new { Condition = Model.DelBiometrics, Text = "DELETE EMPLOYEE PROFILE ON BIOMETRIC MACHINE" },
+                        new { Condition = Model.DelEmailOthers, Text = "DISABLE EMAIL ADDRESS AND OTHER ACCESS" }
+                        })
+                            {
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="me-2">
+                                        @if (item.Condition == true)
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-check">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path d="M5 12l5 5l10 -10" />
+                                            </svg>
+                                        }
+                                        else
+                                        {
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                <path d="M18 6l-12 12" />
+                                                <path d="M6 6l12 12" />
+                                            </svg>
+                                        }
+                                    </div>
+                                    <span>@item.Text</span>
+                                </div>
+
+
+
+                            }
+
+                            <hr class="my-2" />
+
+                            <h6 class="mb-0">Your LAST PAY can be claimed on:</h6>
+                            <span class="fw-bold">@Model.LastPay?.ToString("MMMM d, yyyy")</span>
+                        </div>
+                    }
+
+
+
+                </div>
+            </div>
+        </div>
+
+
+
+        @Html.HiddenFor(m => m.DepartmentStatus, new { @class = "form-control", id = "departmentStatus", @readonly = isDepartmentComplete ? "readonly" : null })
+        @Html.HiddenFor(m => m.AccountingStatus, new { @class = "form-control", id = "departmentStatus", @readonly = isAccountingComplete ? "readonly" : null })
+        @Html.HiddenFor(m => m.OtherStatus, new { @class = "form-control", id = "departmentStatus", @readonly = isOthersComplete ? "readonly" : null })
+        @Html.HiddenFor(m => m.AdminStatus, new { @class = "form-control", id = "departmentStatus", @readonly = isAdminComplete ? "readonly" : null })
+
+    </div>
+</div>
+
+
+
+
+
+@using (Html.BeginForm("ClearDepartment", "Admin", FormMethod.Post, new { id = "form-clear-department", enctype = "multipart/form-data" }))
+{
+    <div class="modal fade" id="clearModal" tabindex="-1" aria-labelledby="clearModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="clearModalLabel">Clear Department Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <h1 class="mb-3">Are you sure?</h1>
+                    <p class="text-muted">
+                        You are about to clear the form. This action is irreversible. Make sure you really want to proceed.
+                    </p>
+
+
+                    <div class="mb-3">
+                        <label class="form-label">Choose What to Clear</label>
+                        <select class="form-select tom-select" asp-for="UserRoles.Roles" id="turnoverEmployeeId">
+                            <option value="" disabled selected>Select an option to clear</option>
+                            @if (Model.userRoles != null && Model.userRoles.Any())
+                            {
+                                foreach (var item in Model.userRoles)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(item.Roles) &&
+                                    !item.Roles.Equals("Manager", StringComparison.OrdinalIgnoreCase) &&
+                                    !item.Roles.Equals("Supervisor", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <option value="@item.Roles">@item.Roles</option>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <option disabled>No roles available to clear</option>
+                            }
+                        </select>
+                    </div>
+
+
+
+                    <!-- Hidden Input -->
+                    @Html.HiddenFor(m => m.RId)
+                    @Html.HiddenFor(m => m.Level)
+                    @Html.HiddenFor(m => m.EmpId)
+                    <!-- Textarea Input -->
+                    <div class="mb-3">
+                        <label for="cRemarks" class="form-label">Remarks</label>
+                        @Html.TextAreaFor(m => m.Clear.Remarks, new { @class = "form-control", id = "cRemarks", placeholder = "Enter your remarks here", rows = "1", @data_bs_autosize = "true" })
+                    </div>
+
+
+                    <!-- File Upload Input -->
+                    <div class="mb-3">
+                        <label for="upload" class="form-label">Upload Files</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-primary" id="upload-trigger">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-upload">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                    <polyline points="7 9 12 4 17 9"></polyline>
+                                    <line x1="12" y1="4" x2="12" y2="16"></line>
+                                </svg>
+                                Select Files
+                            </button>
+                            <span id="file-names" class="text-muted">No files selected</span>
+                        </div>
+
+                        <input type="file" asp-for="Files" id="Files" hidden multiple accept=".pdf, .jpg, .jpeg, .png" />
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep It</button>
+                    <button type="submit" class="btn btn-danger">Yes, Clear Form</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@using (Html.BeginForm("ClearDepartment", "Admin", FormMethod.Post, new { id = "form-clear-department", enctype = "multipart/form-data" }))
+{
+    <div class="modal fade" id="clearUserModal" tabindex="-1" aria-labelledby="clearModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="clearModalLabel">Clear Department Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <h1 class="mb-3">Are you sure?</h1>
+                    <p class="text-muted">
+                        You are about to clear the form. This action is irreversible. Make sure you really want to proceed.
+                    </p>
+
+
+                    <div class="mb-3">
+                        <label class="form-label">Choose What to Clear</label>
+                        <select class="form-select tom-select" asp-for="UserRoles.Roles" id="turnoverEmployeeId">
+                            <option value="" disabled selected>Select an option to clear</option>
+                            @if (Model?.userRoles != null && Model.userRoles.Any())
+                            {
+                                foreach (var item in Model.userRoles)
+                                {
+                                    @if (!string.IsNullOrWhiteSpace(item.Roles) &&
+                                   (item.Roles.Equals("Manager", StringComparison.OrdinalIgnoreCase) ||
+                                   item.Roles.Equals("Supervisor", StringComparison.OrdinalIgnoreCase)))
+                                    {
+                                        <option value="@item.Roles">@item.Roles</option>
+                                    }
+
+                                    @if (Model.assetList == null || Model.assetList.Count == 0)
+                                    {
+                                        <option value="Turnover">Turn Over</option>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <option disabled>No roles available to clear</option>
+                            }
+                        </select>
+                    </div>
+
+
+
+                    <!-- Hidden Input -->
+                    @Html.HiddenFor(m => m.RId)
+                    @Html.HiddenFor(m => m.Level)
+                    @Html.HiddenFor(m => m.EmpId)
+                    <!-- Textarea Input -->
+                    <div class="mb-3">
+                        <label for="cRemarks" class="form-label">Remarks</label>
+                        @Html.TextAreaFor(m => m.Clear.Remarks, new { @class = "form-control", id = "cRemarks", placeholder = "Enter your remarks here", rows = "1", @data_bs_autosize = "true" })
+                    </div>
+
+
+                    <!-- File Upload Input -->
+                    <div class="mb-3">
+                        <label for="upload" class="form-label">Upload Files</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-primary" id="upload-trigger1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-upload">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                                    <polyline points="7 9 12 4 17 9"></polyline>
+                                    <line x1="12" y1="4" x2="12" y2="16"></line>
+                                </svg>
+                                Select Files
+                            </button>
+                            <span id="file-names1" class="text-muted">No files selected</span>
+                        </div>
+
+                        <input type="file" asp-for="Files" id="Files1" hidden multiple accept=".pdf, .jpg, .jpeg, .png" />
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep It</button>
+                    <button type="submit" class="btn btn-danger">Yes, Clear Form</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<div class="modal fade" id="turnoverModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="turnoverModalLabel">Turnover Asset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Employee Details -->
+                <div class="mb-3">
+                    <label class="form-label">Choose Employee</label>
+                    <select class="form-select tom-select-subtitle" asp-for="Employee.EmpId" id="turnoverEmployeeId">
+                        <option value="" disabled selected>Select Employee</option>
+                        @if (Model.employees != null && Model.employees.Any())
+                        {
+                            foreach (var item in Model.employees)
+                            {
+                                <option value="@item.EmpId" data-subtitle="@item.EmpId" data-name="@item.EmployeeName">@item.EmployeeName</option>
+                            }
+                        }
+                        else
+                        {
+                            <option disabled>No Employees Available</option>
+                        }
+                    </select>
+                </div>
+                <!-- Remarks -->
+                <div class="mb-3">
+                    <label for="remarks" class="form-label">Remarks</label>
+                    @Html.TextAreaFor(m => m.Employee.Remarks, new { @class = "form-control", @placeholder = "Enter Remarks", id = "TurnRemarks", data_bs_toggle = "autosize" })
+                </div>
+            </div>
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btnTurnover">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@using (Html.BeginForm("FinishClearance", "Admin", FormMethod.Post, new { id = "form-finish-clearance" }))
+{
+    <div class="modal fade" id="finishClearanceModal" tabindex="-1" aria-labelledby="finishClearanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="finishClearanceModalLabel">Finish Clearance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <!-- First Question -->
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Delete employee profile on biometric machine?</strong></label>
+                        <select class="form-select tom-select" id="deleteBiometric" asp-for="DelBiometrics">
+                            <option value="" selected disabled>Select</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="mb-3">
+                        <label class="form-label">Remarks</label>
+                        @Html.TextAreaFor(m => m.NoteRemarks, new { @class = "form-control", @placeholder = "Enter Remarks", id = "TurnRemarks", data_bs_toggle = "autosize" })
+                    </div>
+
+                    <!-- Last Pay Date -->
+                    <div class="mb-3">
+                        <label class="form-label">Last Pay</label>
+                        @Html.TextBoxFor(m => m.LastPay, new { @class = "form-control date-input" })
+                    </div>
+                    @Html.HiddenFor(m => m.RId)
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitClearance">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@using (Html.BeginForm("ApproveClearance", "Admin", FormMethod.Post, new { id = "form-approve-clearance" }))
+{
+    <div class="modal modal-blur fade" id="approveClearanceModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Confirm Approval</h5>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check-circle text-success" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M9 12l2 2l4 -4" />
+                            <path d="M12 21a9 9 0 1 0 -9 -9" />
+                        </svg>
+                    </div>
+                    <p class="fs-510 fw-semibold">Are you sure you want to approve this clearance?</p>
+                    @Html.HiddenFor(m => m.RId)
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success px-4">Approve</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+}
+<!-- Approve Clearance Modal -->
+@section Scripts {
+
+
+    <script>
+        $(document).ready(function () {
+            // Initialize the "Check All" checkbox based on the state of individual checkboxes
+            const initializeCheckAll = function () {
+                const assetCheckboxes = $('.asset-checkbox');
+                const checkAll = $('#checkAll');
+                const allChecked = assetCheckboxes.length > 0 && assetCheckboxes.filter(':checked').length === assetCheckboxes.length;
+                checkAll.prop('checked', allChecked);
+            };
+
+            // When the "Check All" checkbox is clicked
+            $('#checkAll').click(function () {
+                const isChecked = $(this).prop("checked");
+                $('.asset-checkbox').prop('checked', isChecked); // Set all individual checkboxes to the same state
+            });
+
+            // When any individual checkbox is clicked
+            $(document).on('click', '.asset-checkbox', function () {
+                initializeCheckAll(); // Update the "Check All" checkbox
+            });
+
+            // Initialize on page load
+            initializeCheckAll();
+
+            // Handle the Turnover button click event (form submission)
+            $('.btnTurnover').on('click', function () {
+                var selectedAssets = [];
+                var selectedEmployee = null;
+
+                // Get selected employee information (assuming only one employee is selected)
+                var selectedEmpId = $('#turnoverModal').find('.form-select option:selected').val();
+                var selectedEmpName = $('#turnoverModal').find('.form-select option:selected').data('name');
+
+                // Set employee data into the modal fields
+                $('#turnoverModal').find('#turnoverEmployeeId').val(selectedEmpId); // Set Employee ID
+                $('#turnoverModal').find('#turnoverEmployeeName').val(selectedEmpName); // Set Employee Name
+
+                // Populate the textboxes
+                $('#TName').val(selectedEmpName);  // Set Employee Name into the textbox
+                $('#TEmpId').val(selectedEmpId);  // Set Employee ID into the textbox
+
+                // Collect the selected asset IDs
+                $('.asset-checkbox:checked').each(function () {
+                    selectedAssets.push($(this).val()); // Assuming you're pushing asset Ids
+                });
+
+                // Set the selected asset IDs in the hidden input field
+                $('#turnoverList').val(selectedAssets.join(','));
+
+                // Populate the remarks
+                var remarks = $('#TurnRemarks').val();
+                $('#TRemarks').val(remarks);
+                // Submit the form (Optional if needed)
+                $('#form-turnover').submit(); // Regular form submission if needed
+            });
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            // Trigger file input click when button is clicked
+            $('#upload-trigger').on('click', function () {
+                $('#Files').click();
+            });
+
+            // Update file names dynamically when files are selected
+            $('#Files').on('change', function () {
+                const fileNames = Array.from(this.files).map(file => file.name).join(', ') || 'No files selected';
+                $('#file-names').text(fileNames);
+            });
+        });
+
+
+        $(document).ready(function () {
+            // Trigger file input click when button is clicked
+            $('#upload-trigger1').on('click', function () {
+                $('#Files1').click();
+            });
+
+            // Update file names dynamically when files are selected
+            $('#Files1').on('change', function () {
+                const fileNames = Array.from(this.files).map(file => file.name).join(', ') || 'No files selected';
+                $('#file-names1').text(fileNames);
+            });
+        });
+    </script>
+
+}
+
+
+

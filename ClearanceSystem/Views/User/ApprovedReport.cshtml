@@ -1,0 +1,155 @@
+﻿@{
+    ViewData["Title"] = "Approved Registration Reports";
+}
+
+@model Registration
+
+<div class="page-header d-print-none">
+    <div class="container-xxl">
+        <div class="row g-2 align-items-center">
+            <div class="col-6">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">
+                    Approved Reports - Register
+                    <h2 class="page-title">
+                        Approved Registration Reports for Clearance
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-auto ms-auto d-print-none">
+
+                @* <a class="btn btn-primary" href="@Url.Action("Form", "Admin")">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-bubble-text"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10h10" /><path d="M9 14h5" /><path d="M12.4 3a5.34 5.34 0 0 1 4.906 3.239a5.333 5.333 0 0 1 -1.195 10.6a4.26 4.26 0 0 1 -5.28 1.863l-3.831 2.298v-3.134a2.668 2.668 0 0 1 -1.795 -3.773a4.8 4.8 0 0 1 2.908 -8.933a5.33 5.33 0 0 1 4.287 -2.16" /></svg>
+                    Register Clearance
+                </a> *@
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xxl ">
+        <div class="card">
+            <div id="table-default">
+                <div class="col- d-lg-flex px-3 pt-3">
+
+                    <div class="d-flex text-center text-lg-start mb-3">
+                        <div class="text-muted">
+                            Show
+                            <div class="mx-2 d-inline-block w-25">
+                                <input id="entries" type="number" class="form-control" value="10" autocomplete="off">
+                            </div>
+                            entries
+                        </div>
+
+                    </div>
+
+                    <div class="input-icon mb-3 ms-auto">
+                        <input type="search" class="search form-control" placeholder="Search">
+                        <span class="input-icon-addon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
+                        </span>
+
+                    </div>
+                </div>
+
+
+                <hr class="m-0">
+
+                <div class="table-responsive">
+                    <table class="table text-muted table-mobile-sm" id="datatable" data-filename="Registration">
+                        <thead class="table-thead">
+                            <tr>
+                                <th>Status</th>
+                                <th><button class="table-sort" data-sort="sort-ID">Registration ID</button></th>
+                                <th><button class="table-sort" data-sort="sort-EmpId">Employee ID</button></th>
+                                <th><button class="table-sort" data-sort="sort-EmpName">Employee Name</button></th>
+                                <th><button class="table-sort" data-sort="sort-Department">Department</button></th>
+                                <th><button class="table-sort" data-sort="sort-Remarks">Remarks</button></th>
+                                <th><button class="table-sort" data-sort="sort-LDay">Last Day</button></th>
+                                @*     <th>Action</th> *@
+                            </tr>
+                        </thead>
+                        <tbody class="table-tbody">
+                            @if (Model.Register == null || !Model.Register.Any())
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center">NO DATA AVAILABLE</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var row in Model.Register)
+                                {
+                                    <tr>
+                                        @{
+                                            string badgeClass = "bg-secondary-lt";
+                                            string badgeText = "Inactive";
+                                            switch (row.Status)
+                                            {
+                                                case "Pending":
+                                                    badgeClass = "bg-danger-lt";
+                                                    badgeText = "Pending";
+                                                    break;
+
+                                                case "For Final Approval":
+                                                    badgeClass = "bg-warning-lt";
+                                                    badgeText = "For Final Approval";
+                                                    break;
+                                                case "Cleared":
+                                                    badgeClass = "bg-success-lt";
+                                                    badgeText = "Cleared";
+                                                    break;
+
+                                            }
+
+                                        }
+
+                                        <td data-label="Status">
+                                            <span class="badge @badgeClass">@row.Status</span>
+                                        </td>
+
+                                        <td data-label="Registration ID" class="text-nowrap sort-ID">
+                                            <a href="/User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.RId</a>
+                                        </td>
+                                        <td data-label="Employee ID" class="text-nowrap sort-EmpId">
+                                            <a href="/User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.EmpId</a>
+                                        </td>
+                                        <td data-label="Employee Name" class="text-nowrap sort-EmpName">
+                                            <a href="/User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Name</a>
+                                        </td>
+                                        <td data-label="Department" class="text-nowrap sort-Department">
+                                            <a href="/User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.DepartmentName</a>
+                                        </td>
+                                        <td data-label="Remarks" class="text-nowrap sort-Remarks">
+                                            <a href="/User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Remarks</a>
+                                        </td>
+                                        <td data-label="Last Day" class="text-nowrap sort-LDay">
+                                            <a href="/User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.LastDay</a>
+                                        </td>
+
+                                        @*  <td data-label="Action">
+                                            <a type="button" class="btn btn-danger btnDelete" data-rid="@row.RId" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+                                            </a>
+                                        </td> *@
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="card-footer d-flex align-items-center">
+                    <ul class="pagination m-0 ms-auto"></ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

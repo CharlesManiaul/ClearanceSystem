@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "Interview Form";
+    Layout = null;
+}
+
+@model Interview
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Exit Interview</title>
+
+    <!-- Tabler CSS -->
+    <link rel="stylesheet" href="~/css/tabler.min.css" />
+    <link rel="stylesheet" href="~/css/tabler-vendors.min.css" />
+    <link rel="stylesheet" href="~/lib/dropzone/dist/dropzone.css?1684106062" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+
+    <!-- Custom Styles -->
+    <style>
+        .page-header {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .question-row {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .selectgroup {
+            display: flex;
+            gap: 15px;
+        }
+
+        .selectgroup-item {
+            display: inline-block;
+            padding: 5px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- Page Header -->
+    <div class="page-header d-print-none">
+        <div class="container-xxl">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-12">
+                    <h2 class="page-title text-center">
+                        Employee Exit Interview Form
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container-xxl">
+            <div class="card p-2">
+                    @using (Html.BeginForm("SubmitAnswer", "Interview", FormMethod.Post, new { id = "form-submit-answer" }))
+                    {
+                        <div class="card-header">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="EmpId" class="form-label">Employee ID:</label>
+                                    @Html.TextBoxFor(m => m.EmpId, new { @class = "form-control", id = "EmpId", required = "true" })
+                                    @Html.HiddenFor(m => m.IVId, new { @class = "form-control", id = "IVId", required = "true" })
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fullName" class="form-label">Employee Name:</label>
+                                    @Html.TextBoxFor(m => m.EmpName, new { @class = "form-control", id = "fullName", @readonly = "true" })
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="DepartmentName" class="form-label">Department:</label>
+                                    @Html.TextBoxFor(m => m.DepartmentName, new { @class = "form-control", id = "DepartmentName", @readonly = "true" })
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="Position" class="form-label">Position:</label>
+                                    @Html.TextBoxFor(m => m.Position, new { @class = "form-control", id = "Position", @readonly = "true" })
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3">Interview Questions</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tbody>
+                                        @foreach (var row in Model.intForm)
+                                        {
+                                            <tr class="question-row">
+                                                <td class="fw-bold pe-3">@row.QNumber.</td>
+                                                <td>@row.Question?</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2">
+                                                    @if (row.Type.Trim() == "Y/N")
+                                                    {
+                                                        <div class="mt-2 form-selectgroup">
+                                                            <label class="form-selectgroup-item">
+                                                                <input type="radio" name="Answers[@row.QNumber]" value="Yes" class="form-selectgroup-input" required>
+                                                                <span class="form-selectgroup-label d-flex align-items-center">
+
+                                                                    <span class="fw-bold">Yes</span>
+                                                                </span>
+                                                            </label>
+                                                            <label class="form-selectgroup-item">
+                                                                <input type="radio" name="Answers[@row.QNumber]" value="No" class="form-selectgroup-input" required>
+                                                                <span class="form-selectgroup-label d-flex align-items-center">
+
+                                                                    <span class="fw-bold">No</span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                    else if (row.Type == "Sentence")
+                                                    {
+                                                        <div class="mt-2">
+
+                                                        <textarea id="Answers_@row.QNumber"
+                                                                  name="Answers[@row.QNumber]"
+                                                                  class="form-control"
+                                                                  placeholder="Type answer here"
+                                                                  required></textarea>
+                                                               </div>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-primary">Submit Answers</button>
+                            </div>
+                        </div>
+                    
+                    }
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/list.js/dist/list.js"></script>
+    <script src="~/lib/litepicker/dist/litepicker.js"></script>
+    <script src="~/lib/tom-select/dist/js/tom-select.base.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+
+</body>
