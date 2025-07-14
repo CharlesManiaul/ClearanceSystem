@@ -238,7 +238,7 @@ namespace ClearanceSystem.Controllers
         {
             // Create DataTable
             DataTable interviewanswer = new DataTable();
-            interviewanswer.Columns.Add("QuestionNumber", typeof(int));
+            interviewanswer.Columns.Add("QuestionNumber", typeof(int)); 
             interviewanswer.Columns.Add("Answer", typeof(string));
 
             // Process answers and add them to the DataTable
