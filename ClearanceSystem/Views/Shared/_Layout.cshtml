@@ -1,4 +1,13 @@
 ﻿<!DOCTYPE html>
+
+
+@{
+    var isDetailsPage =
+        (ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Details") ||
+        (ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "Details");
+    var currentUser = Context.User.FindFirstValue(ClaimTypes.Name);
+}
+
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -9,6 +18,11 @@
     <link rel="stylesheet" href="~/lib/dropzone/dist/dropzone.css?1684106062" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <link rel="icon" href="Images/favicon.jpg" />
+
+
+
+
+
     <style>
 
 
@@ -24,7 +38,229 @@
         color: var(--text-dark);
         }
 
+
+        /* Floating Chat Toggle Button */
+        .chat-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #00BFA6;
+            color: white;
+            border: none;
+            border-radius: 28px;
+            padding: 10px 16px;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .chat-toggle svg {
+                stroke: white;
+            }
+
+        /* Chat Box Container */
+        .chat-box {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 325px;
+            max-height: 650px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background-color: #00BFA6;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Close Button */
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Chat Body */
+        .chat-body {
+            padding: 10px 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 14px;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Footer */
+        .chat-footer {
+            display: flex;
+            padding: 10px 15px;
+            background: #eee;
+            gap: 6px;
+        }
+
+            .chat-footer input {
+                flex-grow: 1;
+                padding: 8px 10px;
+                font-size: 14px;
+                border: 1px solid #00BFA6;
+                border-radius: 4px;
+            }
+
+            .chat-footer button {
+                padding: 8px 12px;
+                background-color: #00BFA6;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+                .chat-footer button:hover {
+                    background-color: #009b8a;
+                }
+
+        /* Chat Bubbles */
+        .chat-item {
+            padding: 5px 0;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+        }
+
+        /* Receiver */
+        .chat-bubble {
+            background-color:  #009688;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 5px 0;
+            word-wrap: break-word;
+            max-width: 85%;
+            align-self: flex-start;
+        }
+
+        /* Sender (you) */
+        .chat-item.me .chat-bubble {
+            background-color: #d1e7dd;
+            color: #212529;
+            align-self: flex-end;
+        }
+
+        /* Chat Bubble Details */
+        .chat-bubble-title {
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-bubble-author {
+            font-weight: 600;
+        }
+
+        .chat-bubble-date {
+            color: white;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        .chat-item.me .chat-bubble-date {
+            color: #6c757d;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        .chat-bubble-body {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* RESPONSIVE ADJUSTMENTS */
+        media (max-width: 768px) {
+            .chat-box
+
+        {
+            width: 90vw;
+            right: 5vw;
+            bottom: 80px;
+            max-height: 80vh;
+            border-radius: 10px;
+        }
+
+        .chat-toggle {
+            bottom: 16px;
+            right: 16px;
+            padding: 8px 14px;
+            font-size: 14px;
+        }
+
+        .chat-body {
+            height: 60vh;
+        }
+
+        .chat-footer {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+            .chat-footer input,
+            .chat-footer button {
+                width: 100%;
+            }
+
+        }
+
+        media (max-width: 480px) {
+            .chat-box
+
+        {
+            width: 95vw;
+            right: 2.5vw;
+            bottom: 70px;
+            max-height: 75vh;
+        }
+
+        .chat-toggle {
+            font-size: 13px;
+            padding: 6px 12px;
+        }
+
+        .chat-body {
+            font-size: 13px;
+        }
+
+        .chat-bubble-body {
+            font-size: 0.85rem;
+        }
+
+        }
+
+        
     </style>
+
 
 </head>
 <body class="" data-bs-theme="dark">
@@ -171,7 +407,7 @@
                                         <a class="dropdown-item" href="@Url.Action("RegistrationReport", "User")">Registration Report</a>
                                     }
                                     @if (Context.User.FindFirstValue("Admin") == "Admin")
-                                    {
+                                    { 
                                         <a class="dropdown-item" href="@Url.Action("RegistrationReport", "Admin")">Registration Report</a>
                                     }
 
@@ -190,6 +426,8 @@
                                     {
                                         <a class="dropdown-item" href="@Url.Action("AuditTrail", "Report")">Audit Trail Report</a>
                                     }
+
+                                    <a class="dropdown-item" href="@Url.Action("OverDueReport", "Report")">Overdue Report</a>
                                 </div>
                             </li>
 
@@ -204,6 +442,72 @@
         <div class="page-wrapper">
             @RenderBody()
         </div>
+
+        @if (isDetailsPage && Model?.messages != null)
+        {
+
+            <button id="chatToggleBtn" class="chat-toggle" title="Open Chat">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-message-circle" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M3 20l1.65 -1.65" />
+                    <path d="M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4l-4 4l-4 -4h-4a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1" />
+                </svg>
+                <span>Chat</span>
+            </button>
+
+
+            <!-- Floating Chat Box -->
+            <div id="chatBox" class="chat-box">
+                <div class="chat-header">
+                    Chat
+                    <button class="close-chat" id="closeChat">&times;</button>
+                </div>
+
+                <div class="chat-body">
+                    <div class="chat-bubbles">
+                        @foreach (var row in Model.messages)
+                        {
+                            if (row.sent_by == currentUser)
+                            {
+                                <div class="chat-item me">
+                                    <div class="chat-bubble chat-bubble-me">
+                                        <div class="chat-bubble-title">
+                                            <span class="chat-bubble-author">@row.sent_by</span>
+                                            <span class="chat-bubble-date">@row.sent_at.ToString("MM/dd/yyyy hh:mm tt")</span>
+                                        </div>
+                                        <div class="chat-bubble-body">@row.message</div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="chat-item">
+                                    <div class="chat-bubble">
+                                        <div class="chat-bubble-title">
+                                            <span class="chat-bubble-author">@row.sent_by</span>
+                                            <span class="chat-bubble-date">@row.sent_at.ToString("MM/dd/yyyy hh:mm tt")</span>
+                                        </div>
+                                        <div class="chat-bubble-body">@row.message</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="chat-footer">
+                    <input type="text" id="chatInput" placeholder="Type your message..." />
+                    <button id="sendChat">Send</button>
+                </div>
+            </div>
+
+
+        }
+    
+    
+    
+    
+    
     </div>
 
 
@@ -299,8 +603,8 @@
 
 
 
-    <script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
 
     <script>
@@ -595,27 +899,95 @@
         list.on('updated', function () {
             updateProfileCount();
         });
+
+            //datatable
+        var columns1 = [];
+        $(".table-thead1").find(".table-sort").each(function () {
+            columns1.push($(this).data("sort"));
+        });
+
+        const list1 = new List('table-default1', {
+            sortClass: 'table-sort',
+            listClass: 'table-tbody1',
+            page: 5,
+            pagination: true,
+            valueNames: columns1
+        });
+
+        $("#entries1").change(function () {
+            list1.page = $(this).val();
+            list1.update();
+        });
+
+
+    </script>
+
+    <script>
+        const controller = '@ViewContext.RouteData.Values["controller"]';
+
+        $(document).ready(function () {
+            // Toggle chat box visibility
+            $('#chatToggleBtn').click(function () {
+                $('#chatBox').fadeToggle(function () {
+                    scrollToBottom(); // Auto-scroll when chat box opens
+                });
+            });
+
+            $('#closeChat').click(function () {
+                $('#chatBox').fadeOut();
+            });
+
+            // Send on button click
+            $('#sendChat').click(function () {
+                sendChatMessage();
+            });
+
+            // Send on Enter key
+            $('#chatInput').on("keypress", function (e) {
+                if (e.which === 13) {
+                    e.preventDefault(); // prevent form submit
+                    sendChatMessage();
+                }
+            });
+
+            // Auto-scroll to bottom on page load if chat box is visible
+            if ($('#chatBox').is(':visible')) {
+                scrollToBottom();
+            }
+
+            function sendChatMessage() {
+                const message = $('#chatInput').val();
+                const RId = $('#RId').val();
+
+                if ($.trim(message) === "") return;
+
+                $.ajax({
+                    method: "POST",
+                    url: `/${controller}/SendMessage`,
+                    data: { RId, message },
+                    success: function (response) {
+                        if (response && response.trim() !== "") {
+                            $('.chat-bubbles').append(response);
+                            $('#chatInput').val('');
+                            scrollToBottom();
+                        } else {
+                            console.warn("Empty response.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("SendMessage error:", error);
+                    }
+                });
+            }
+
+            function scrollToBottom() {
+                const chatBody = $('.chat-body');
+                chatBody.scrollTop(chatBody[0].scrollHeight);
+            }
+        });
     </script>
 
 
-    // <script>
-    //     var columns = [];
-    //       $(".table-thead1").find(".table-sort").each(function () {
-    //           columns.push($(this).data("sort"));
-    //       });
 
-    //       const list = new List('table-default', {
-    //           sortClass: 'table-sort',
-    //           listClass: 'table-tbody',
-    //           page: 10,
-    //           pagination: true,
-    //           valueNames: columns
-    //       });
-
-    //       $("#entries").change(function () {
-    //           list.page = $(this).val();
-    //           list.update();
-    //       });
-    // </script>
 </body>
 </html>

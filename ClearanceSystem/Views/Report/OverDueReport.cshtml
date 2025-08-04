@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Audit Trail Report";
+    ViewData["Title"] = "Over Due Report";
 }
 
 @model Reports
@@ -19,7 +19,6 @@
             </div>
 
             <div class="col-auto ms-auto d-print-none">
-
             </div>
 
         </div>
@@ -58,13 +57,14 @@
                 <hr class="m-0">
 
                 <div class="table-responsive">
-                    <table class="table text-muted table-mobile-sm" id="datatable" data-filename="Registration">
+                    <table class="table text-muted table-mobile-sm" id="datatable" >
                         <thead class="table-thead">
                             <tr>
-                                <th><button class="table-sort" data-sort="sort-action">Action</button></th>
-                               
-                                <th><button class="table-sort" data-sort="sort-crtdBy">Created By</button></th>
-                                <th><button class="table-sort" data-sort="sort-crtdDate">Created Date</button></th>
+                                <th><button class="table-sort" data-sort="sort-name">Name</button></th>
+                                <th><button class="table-sort" data-sort="sort-status">Status</button></th>
+                                <th><button class="table-sort" data-sort="sort-By">By</button></th>
+                                <th><button class="table-sort" data-sort="sort-dueDate">Due Date</button></th>
+                                <th><button class="table-sort" data-sort="sort-DateDue">No. Days Overdue</button></th>
                                 @* <th>Action</th> *@
                             </tr>
                         </thead>
@@ -72,7 +72,7 @@
                             @if (Model.report == null || !Model.report.Any())
                             {
                                 <tr>
-                                    <td colspan="3" class="text-center">NO DATA AVAILABLE</td>
+                                    <td colspan="5" class="text-center">NO DATA AVAILABLE</td>
                                 </tr>
                             }
                             else
@@ -80,16 +80,24 @@
                                 @foreach (var row in Model.report)
                                 {
                                     <tr>
-                                        <td data-label="Action" class="text-nowrap sort-action">
-                                            <a class="text-decoration-none theme-text">@row.action</a>
+                                        <td data-label="Action" class="text-nowrap sort-name">
+                                            <a class="text-decoration-none theme-text">@row.name</a>
                                         </td>
-                                       
-                                        <td data-label="Created By" class="text-nowrap sort-crtdBy">
-                                            <a class="text-decoration-none theme-text">@row.createdBy</a>
+                                        <td data-label="Action" class="text-nowrap sort-status">
+                                            <a class="text-decoration-none theme-text">@row.CurrentStatus</a>
                                         </td>
-                                        <td data-label="Created Date" class="text-nowrap sort-crtdDate">
-                                            <a class="text-decoration-none theme-text">@row.createdDate</a>
+                                        <td data-label="Action" class="text-nowrap sort-by">
+                                            <a class="text-decoration-none theme-text">@row.ClearedBy</a>
                                         </td>
+                                        <td data-label="Action" class="text-nowrap sort-dueDate">
+                                            <a class="text-decoration-none theme-text">@row.DueDate</a>
+                                        </td>
+
+                                        <td data-label="Action" class="text-nowrap sort-DateDue">
+                                            <a class="text-decoration-none theme-text">@row.DaysOverdue</a>
+                                        </td>
+
+                                        
                                     </tr>
                                 }
                             }

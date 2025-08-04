@@ -181,35 +181,35 @@
         </div>
 
         <div class="card mb-3">
-            <div id="table-default">
+            <div id="table-default1">
                 <div class="col- d-lg-flex px-3 pt-3">
 
                     <div class="d-flex text-center text-lg-start mb-3">
                         <div class="text-muted">
                             Show
                             <div class="mx-2 d-inline-block w-25">
-                                <input id="entries1" type="number" class="form-control" value="10" autocomplete="off">
+                                <input id="entries1" type="number" class="form-control" value="5" autocomplete="off">
                             </div>
                             entries
                         </div>
 
                     </div>
 
-                    <div class="input-icon mb-3 ms-auto">
+                @*     <div class="input-icon mb-3 ms-auto">
                         <input type="search" class="search1 form-control" placeholder="Search">
                         <span class="input-icon-addon">
                             <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /></svg>
                         </span>
 
-                    </div>
+                    </div> *@
                 </div>
 
 
                 <hr class="m-0">
 
                 <div class="table-responsive">
-                    <table class="table text-muted table-mobile-sm" id="datatable" data-filename="Registration">
-                        <thead class="table-thead">
+                    <table class="table text-muted table-mobile-sm" id="datatable">
+                        <thead class="table-thead1">
                             <tr>
                                 <th>Status</th>
                                 <th><button class="table-sort" data-sort="sort-ID">Registration ID</button></th>
@@ -222,7 +222,7 @@
                             </tr>
                         </thead>
 
-                        <tbody class="table-tbody">
+                        <tbody class="table-tbody1">
                             @if (Model.clearing == null || !Model.clearing.Any())
                             {
                                 <tr>
@@ -263,21 +263,24 @@
                                         <td data-label="Employee ID" class="text-nowrap sort-EmpId">
                                             <a href="User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.EmpId</a>
                                         </td>
-                                        <td data-label="Employee Name" class="text-nowrap sort-EmpName">
-                                            <a href="User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.ClearedBy</a>
+                                        <td data-label="Cleared By" class="text-nowrap sort-ClearedBy">
+                                            <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.UpdatedBy</a>
                                         </td>
-                                        <td data-label="Department" class="text-nowrap sort-Department">
-                                            <a href="User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.ClearedDate</a>
+                                        <td data-label="Cleared Date" class="text-nowrap sort-ClearDate">
+                                            <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.UpdatedDate</a>
                                         </td>
-                                        <td data-label="Remarks" class="text-nowrap sort-Remarks">
-                                            <a href="User/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Role</a>
+                                  
+
+
+                                        <td data-label="Role" class="text-nowrap sort-Role">
+                                            <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Role</a>
                                         </td>
                               
 
                         
                                     </tr>
                                 }
-                            }
+                            } 
                         </tbody>
                     </table>
                 </div>
@@ -336,3 +339,24 @@
         </div>
     </div>
 </div>
+
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            // 🔄 Restore saved Show Entries value on page load
+            if (localStorage.getItem("showEntries")) {
+                $("#entries").val(localStorage.getItem("showEntries"));
+            }
+
+            // 💾 Save Show Entries value whenever the user changes it
+            $("#entries").on("change", function () {
+                localStorage.setItem("showEntries", $(this).val());
+            });
+        });
+    </script>
+
+      
+   
+}

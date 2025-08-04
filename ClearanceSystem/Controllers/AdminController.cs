@@ -11,6 +11,7 @@ using System.Security.Claims;
 using FastReport.Export.PdfSimple;
 using FastReport.Utils;
 using Microsoft.IdentityModel.Tokens;
+using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 
 namespace ClearanceSystem.Controllers
@@ -103,7 +104,10 @@ namespace ClearanceSystem.Controllers
 
             reg.userRoles = db.Query<UserRoles>(sql, new { user }).ToList();
 
-
+            reg.messages = db.Query<ClearChat>(@"SELECT TranId
+                                                ,Chat as message
+                                                ,CrtdBy as sent_by
+                                                ,CrtdDate as sent_at FROM CLR_Chat where TranId = @RId ORDER BY CrtdDate ASC", new { RId });
 
             sql = @"SELECT * FROM CLR_Clearing_Report WHERE RId = @RId";
 
@@ -127,6 +131,33 @@ namespace ClearanceSystem.Controllers
 
 
 
+
+
+
+
+        [HttpPost]
+        public IActionResult SendMessage(string RId, string message)
+        {
+            string content = "";
+            string sent_by = HttpContext.User.FindFirstValue(ClaimTypes.Name);
+            int rowsAffected = db.Execute("INSERT INTO CLR_Chat ( TranId, Chat, CrtdBy, CrtdDate) VALUES ( @RId, @message, @sent_by, GETDATE())", new { RId, message, sent_by });
+            if (rowsAffected > 0)
+            {
+                content = $@"<div class='chat-item me'>
+                                <div class='chat-bubble chat-bubble-me'>
+                                    <div class='chat-bubble-title'>
+                                        <div class='col chat-bubble-author'>{sent_by}</div>
+                                        <div class='col-auto chat-bubble-date'>{DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}</div>
+                                    </div>
+                                    <div class='chat-bubble-body'><p>{message}</p></div>
+                                </div>
+                            </div>";
+
+               
+            }
+
+            return Content(content);
+        }
 
 
         //Registration
@@ -173,17 +204,20 @@ namespace ClearanceSystem.Controllers
         {
             DataTable attachfile = new DataTable();
             attachfile.Columns.Add("FileName", typeof(string));
+            attachfile.Columns.Add("MimeType", typeof(string)); // Add new column
             if (reg.Files is not null)
             {
                 foreach (var item in reg.Files)
                 {
                     string FileName = $"{Path.GetFileNameWithoutExtension(item.FileName)}{DateTime.Now.ToString("yyyyMMddhhmmss")}{Path.GetExtension(item.FileName)}";
                     var client = new FtpClient("172.16.0.12", "ftpadmin", "welcome");
+                    // Use ContentType directly from IFormFile
+                    string mimeType = item.ContentType;
                     client.Connect();
                     FtpStatus stat = client.UploadStream(item.OpenReadStream(), $"ClearSys/Attachments/{FileName}");
                     client.Disconnect();
 
-                    attachfile.Rows.Add(FileName);
+                    attachfile.Rows.Add(FileName,mimeType);
                 }
 
             }

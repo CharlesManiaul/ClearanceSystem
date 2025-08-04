@@ -164,14 +164,14 @@
                 </div>
 
                 <div class="card mb-3">
-                    <div id="table-default">
+                    <div id="table-default1">
                         <div class="col- d-lg-flex px-3 pt-3">
 
                             <div class="d-flex text-center text-lg-start mb-3">
                                 <div class="text-muted">
                                     Show
                                     <div class="mx-2 d-inline-block w-25">
-                                        <input id="entries1" type="number" class="form-control" value="10" autocomplete="off">
+                                        <input id="entries1" type="number" class="form-control" value="5" autocomplete="off">
                                     </div>
                                     entries
                                 </div>
@@ -192,7 +192,7 @@
 
                         <div class="table-responsive">
                             <table class="table text-muted table-mobile-sm" id="datatable" data-filename="Registration">
-                                <thead class="table-thead">
+                                <thead class="table-thead1">
                                     <tr>
                                         <th>Status</th>
                                         <th><button class="table-sort" data-sort="sort-ID">Registration ID</button></th>
@@ -206,7 +206,7 @@
                                     </tr>
                                 </thead>
 
-                                <tbody class="table-tbody">
+                                <tbody class="table-tbody1">
                                     @if (Model.clearing == null || !Model.clearing.Any())
                                     {
                                         <tr>
@@ -250,15 +250,15 @@
                                                 <td data-label="Employee Name" class="text-nowrap sort-EmpName">
                                                     <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.EmpName</a>
                                                 </td>
-                                                <td data-label="Department" class="text-nowrap sort-Department">
+                                                <td data-label="Cleared Date" class="text-nowrap sort-ClearDate">
                                                     <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.ClearedDate</a>
                                                 </td>
                                                 <td data-label="Cleared By" class="text-nowrap sort-ClearedBy">
                                                     <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.UpdatedBy</a>
                                                 </td>
 
-        
-                                                <td data-label="Remarks" class="text-nowrap sort-Remarks">
+
+                                                <td data-label="Role" class="text-nowrap sort-Role">
                                                     <a href="Admin/Details/@row.RId/@row.EmpId" class="text-decoration-none theme-text">@row.Role</a>
                                                 </td>
 

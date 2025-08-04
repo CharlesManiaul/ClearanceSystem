@@ -24,7 +24,7 @@ namespace ClearanceSystem.Models
         public DateTime? CrtdDate { get; set; }
         public string Status { get; set; }
         public string Type { get; set; }
-     
+
 
         //
         public string NoteRemarks { get; set; }
@@ -63,6 +63,10 @@ namespace ClearanceSystem.Models
         public List<UserRoles> userRoles { get; set; }
         public UserRoles UserRoles { get; set; }
 
+        //
+
+        public IEnumerable<ClearChat> messages { get; set; }
+
     }
 
 
@@ -90,6 +94,7 @@ namespace ClearanceSystem.Models
         public string Status { get; set; }
         public string EmpName { get; set; }
         public string UpdatedBy { get; set; }
+        public DateTime UpdatedDate { get; set; }
 
 
     }
@@ -124,6 +129,14 @@ namespace ClearanceSystem.Models
         public int RefId { get; set; }
         public string RefType { get; set; }
         public string FileName { get; set; }
+    }
+
+
+    public class ClearChat
+    {
+        public string message { get; set; }
+        public string sent_by { get; set; }
+        public DateTime sent_at { get; set; }
     }
 
 }

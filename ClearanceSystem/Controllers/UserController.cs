@@ -25,13 +25,10 @@ namespace ClearanceSystem.Controllers
             string sql;
             Registration reg = new Registration();
             var username = HttpContext.User.FindFirstValue("username");
-            
+            var name = HttpContext.User.FindFirstValue(ClaimTypes.Name);
+
             var Department = HttpContext.User.FindFirstValue("DepartmentId");
             var EId = HttpContext.User.FindFirstValue("eid");
-
-
-
-
 
             reg.Register = db.Query<Registration>("sp_CLR_registration_user", new { EId, Department }, commandType: CommandType.StoredProcedure).ToList();
 
@@ -41,9 +38,9 @@ namespace ClearanceSystem.Controllers
                     on a.RId = b.RId
                     LEFT JOIN employee_master c
                     on b.EmpId = c.eid
-                    WHERE Role IN (SELECT Roles FROM user_role WHERE EId = @username and SystemName = 'Clearance') and a.Status = 'Cleared'";
+                    WHERE a.Status = 'Cleared' and a.UpdatedBy = @name";
 
-            reg.clearing=db.Query<Clearing>(sql, new { username });
+            reg.clearing=db.Query<Clearing>(sql, new { username, Department, name });
 
             return View(reg);
         }
@@ -69,6 +66,11 @@ namespace ClearanceSystem.Controllers
 
             reg = db.QueryFirst<Registration>(sql, new { RId });
 
+
+            reg.messages = db.Query<ClearChat>(@"SELECT TranId
+                                                ,Chat as message
+                                                ,CrtdBy as sent_by
+                                                ,CrtdDate as sent_at FROM CLR_Chat where TranId = @RId ORDER BY CrtdDate ASC", new { RId });
 
             sql = @"
                     SELECT a.eid as EmpId, a.name as EmployeeName, b.position, c.depName as DepartmentName 
@@ -111,6 +113,30 @@ namespace ClearanceSystem.Controllers
         }
 
 
+
+        //chat
+
+        [HttpPost]
+        public IActionResult SendMessage(string RId, string message)
+        {
+            string content = "";
+            string sent_by = HttpContext.User.FindFirstValue(ClaimTypes.Name);
+            int rowsAffected = db.Execute("INSERT INTO CLR_Chat ( TranId, Chat, CrtdBy, CrtdDate) VALUES ( @RId, @message, @sent_by, GETDATE())", new { RId, message, sent_by });
+            if (rowsAffected > 0)
+            {
+                content = $@"<div class='chat-item me'>
+                                <div class='chat-bubble chat-bubble-me'>
+                                    <div class='chat-bubble-title'>
+                                        <div class='col chat-bubble-author'>{sent_by}</div>
+                                        <div class='col-auto chat-bubble-date'>{DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")}</div>
+                                    </div>
+                                    <div class='chat-bubble-body'><p>{message}</p></div>
+                                </div>
+                            </div>";
+            }
+
+            return Content(content);
+        }
 
 
         //turnover

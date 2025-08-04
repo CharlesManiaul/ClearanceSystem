@@ -10,8 +10,11 @@
         public DateTime createdDate { get; set; }
         public string createdBy { get; set; }
 
+        public string ClearedBy { get; set; }
         public string name { get; set; }
-
+        public string DaysOverdue { get; set; }
+        public DateTime DueDate { get; set; }
+        public string CurrentStatus { get; set; }
 
 
         public IEnumerable<Reports> report { get; set; }
