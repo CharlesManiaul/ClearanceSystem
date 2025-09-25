@@ -608,63 +608,49 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
 
     <script>
-             $(document).ready(function () {
+        $(document).ready(function () {
             let $select = $(".tom-select-new-add");
 
-            // Predefined options for groups
-            let groups = {
-                "Voluntary": [
-                    "Better job", "Relocation", "Illness", "Retirement", "Family"
-                ],
-                "Involuntary": [
-                    "Redundancy", "End of Probationary", "Non-Reappointment",
-                    "Mandatory Retirement", "Disciplinary Action"
-                ],
-                "Others": [] // Empty initially but should be created
-            };
+            // Fetch reasons from backend
+            $.getJSON("/Reasons/GetReasons", function (groups) {
+                $.each(groups, function (groupName, options) {
+                    let optgroup = $select.find(`optgroup[label='${groupName}']`);
+                    if (optgroup.length) {
+                        optgroup.empty(); // clear placeholder
+                        $.each(options, function (index, value) {
+                            optgroup.append(`<option value="${value}">${value}</option>`);
+                        });
+                    }
+                });
 
-            // Load predefined options into the HTML select
-            $.each(groups, function (groupName, options) {
-                let optgroup = $select.find(`optgroup[label='${groupName}']`);
-                if (optgroup.length === 0) {
-                    $select.append(`<optgroup label="${groupName}"></optgroup>`);
-                    optgroup = $select.find(`optgroup[label='${groupName}']`);
-                }
-                $.each(options, function (index, value) {
-                    optgroup.append(`<option value="${value}">${value}</option>`);
+                // Apply TomSelect
+                new TomSelect(".tom-select-new-add", {
+                    persist: false,
+                    create: function (input) {
+                        // Save new input under Others
+                        $.post("/Reasons/SaveReason", { reason: input }, function (resp) {
+                            if (resp.success) {
+                                this.addOption({ value: input, text: input, optgroup: "Others" });
+                                this.addItem(input);
+                            } else {
+                                alert(resp.message);
+                            }
+                        }.bind(this));
+                        return input;
+                    },
+                    render: {
+                        option: function (data, escape) {
+                            return '<div class="py-1">' + escape(data.text) + '</div>';
+                        },
+                        optgroup_header: function (data, escape) {
+                            return `<div class="optgroup-header font-bold py-1">${escape(data.label)}</div>`;
+                        }
+                    }
                 });
             });
-
-            // Initialize TomSelect with optgroup order
-            let select = new TomSelect(".tom-select-new-add", {
-                persist: false,
-                create: function (input) {
-                    // Check if input already exists
-                    let exists = Object.values(select.options).some(option => option.text.toLowerCase() === input.toLowerCase());
-                    if (!exists) {
-                        // Ensure "Others" optgroup is created
-                        let $othersOptgroup = $select.find("optgroup[label='Others']");
-                        if ($othersOptgroup.length === 0) {
-                            $select.append(`<optgroup label="Others"></optgroup>`);
-                            $othersOptgroup = $select.find("optgroup[label='Others']");
-                        }
-
-                        // Add new value to the "Others" group
-                        select.addOption({ value: input, text: input, optgroup: "Others" });
-                        $othersOptgroup.append(`<option value="${input}" selected>${input}</option>`);
-                    }
-                    return input;
-                },
-                render: {
-                    option: function (data, escape) {
-                        return '<div class="py-1">' + escape(data.text) + '</div>';
-                    },
-                    optgroup_header: function (data, escape) {
-                        return `<div class="optgroup-header">${escape(data.label)}</div>`;
-                    }
-                }
-            });
         });
+
+
 
     </script>
 

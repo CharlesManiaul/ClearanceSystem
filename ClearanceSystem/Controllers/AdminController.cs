@@ -197,9 +197,49 @@ namespace ClearanceSystem.Controllers
             ViewBag.form = "active";
             return View(reg);
         }
+
+
+        // GET: /Reasons/GetReasons
+        [HttpGet]
+        [Route("/Reasons/GetReasons")]
+        public JsonResult GetReasons()
+        {
+            var reasons = db.Query<dynamic>("SELECT Category, Reason FROM CLR_Reason_Master")
+                .GroupBy(r => (string)r.Category)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(r => (string)r.Reason).ToList()
+                );
+
+            // Ensure all 3 groups exist
+            var ordered = new Dictionary<string, List<string>>
+        {
+            { "Voluntary", reasons.ContainsKey("Voluntary") ? reasons["Voluntary"] : new List<string>() },
+            { "Involuntary", reasons.ContainsKey("Involuntary") ? reasons["Involuntary"] : new List<string>() },
+            { "Others", reasons.ContainsKey("Others") ? reasons["Others"] : new List<string>() }
+        };
+
+            return Json(ordered);
+        }
+
+        // POST: /Reasons/SaveReason
+        [HttpPost]
+        [Route("/Reasons/SaveReason")]
+        public JsonResult SaveReason(string reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+                return Json(new { success = false, message = "Reason cannot be empty." });
+
+            db.Execute(
+                "INSERT INTO CLR_Reason_Master (Category, Reason) VALUES (@cat, @reason)",
+                new { cat = "Others", reason }
+            );
+
+            return Json(new { success = true });
+        }
+
         //Saving form
         [HttpPost]
-
         public IActionResult SaveForm(Registration reg)
         {
             DataTable attachfile = new DataTable();
